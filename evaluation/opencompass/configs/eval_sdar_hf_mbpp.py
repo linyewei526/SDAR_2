@@ -83,10 +83,7 @@ summarizer = dict(
 )
 
 # datasets = [*mmlu_datasets, *gsm8k_datasets, *humaneval_datasets, *sanitized_mbpp_datasets, *math_datasets, *mathbench_datasets, *ifeval_datasets]
-# datasets = [*gsm8k_datasets]
-# datasets = [*math_datasets]
-datasets = [*humaneval_datasets]
-# datasets = [*sanitized_mbpp_datasets]
+datasets = [*sanitized_mbpp_datasets]
 for dataset in datasets:
     dataset['infer_cfg']['inferencer']['batch_size'] = 1 # only support batchsize=1 up to now
 
