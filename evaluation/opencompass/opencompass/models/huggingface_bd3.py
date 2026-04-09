@@ -1,5 +1,8 @@
 # flake8: noqa
 # yapf: disable
+import importlib
+import json
+import os
 from typing import Dict, List, Optional, Union
 
 from einops import rearrange
@@ -319,12 +322,23 @@ def _get_stopping_criteria(stop_words, tokenizer, batch_size):
     c = MultiTokenEOSCriteria(stop_words, tokenizer, batch_size)
     return StoppingCriteriaList([c])
 
+def _load_config_dict(path: str) -> dict:
+    config_path = os.path.join(path, 'config.json')
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f'Cannot find config.json under {path}')
+    with open(config_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+
 def _get_possible_max_seq_len(max_seq_len, path):
     if max_seq_len is not None:
         return max_seq_len
 
-    from transformers import AutoConfig
-    config = AutoConfig.from_pretrained(path, trust_remote_code=True)
+    try:
+        config = _load_config_dict(path)
+    except (FileNotFoundError, json.JSONDecodeError):
+        from transformers import AutoConfig
+        config = AutoConfig.from_pretrained(path, trust_remote_code=True)
     possible_keys = [
         'max_position_embeddings',
         'seq_length',
@@ -332,9 +346,36 @@ def _get_possible_max_seq_len(max_seq_len, path):
         'max_sequence_length'
     ]
     for k in possible_keys:
+        if isinstance(config, dict) and k in config:
+            return config[k]
         if hasattr(config, k):
             return getattr(config, k)
     raise ValueError('max_seq_len is not provided and cannot be inferred from the model config.')
+
+
+def _load_local_model_class(path: str, module_path: str, class_name: Optional[str] = None):
+    try:
+        module = importlib.import_module(module_path)
+    except ModuleNotFoundError as exc:
+        fallback_module_path = module_path
+        if module_path.startswith('evaluation.opencompass.'):
+            fallback_module_path = module_path[len('evaluation.opencompass.'):]
+        if fallback_module_path == module_path:
+            raise
+        module = importlib.import_module(fallback_module_path)
+    if class_name is None:
+        architectures = _load_config_dict(path).get('architectures', [])
+        class_name = architectures[0] if architectures else None
+    if class_name is None:
+        raise ValueError(
+            'local_modeling_class is not provided and no architectures entry was found in config.json.'
+        )
+    try:
+        return getattr(module, class_name)
+    except AttributeError as exc:
+        raise AttributeError(
+            f'Cannot find class `{class_name}` in local modeling module `{module_path}`.'
+        ) from exc
 
 
 def _convert_chat_messages(inputs, merge_role=True, skip_empty_prompt=True):
@@ -444,16 +485,27 @@ class BD3withChatTemplate(BaseModel):
                  fastchat_template: Optional[str] = None,
                  stop_words: Optional[str] = [],
                  mode: str = 'none',
+                 local_modeling_module: Optional[str] = None,
+                 local_modeling_class: Optional[str] = None,
                  **other_kwargs):
 
         self.logger = get_logger()
         self.path = path
         self.tokenizer_only = tokenizer_only
+        self.local_modeling_module = local_modeling_module
+        self.local_modeling_class = local_modeling_class
         self.template_parser = _get_meta_template(meta_template)
         self.max_seq_len = _get_possible_max_seq_len(max_seq_len, path)
         self._load_tokenizer(tokenizer_path or path, tokenizer_kwargs, pad_token_id)
         if not tokenizer_only:
-            self._load_model(path=path, kwargs=model_kwargs, peft_path=peft_path, peft_kwargs=peft_kwargs)
+            self._load_model(
+                path=path,
+                kwargs=model_kwargs,
+                peft_path=peft_path,
+                peft_kwargs=peft_kwargs,
+                local_modeling_module=local_modeling_module,
+                local_modeling_class=local_modeling_class,
+            )
         self.generation_kwargs = generation_kwargs
         self.fastchat_template = fastchat_template
         self.stop_words = list(set(stop_words + self._get_potential_stop_words(path)))
@@ -495,22 +547,41 @@ class BD3withChatTemplate(BaseModel):
             return
         raise ValueError('pad_token_id is not set for this tokenizer. Please set `pad_token_id={PAD_TOKEN_ID}` in model_cfg.')
 
-    def _load_model(self, path: str, kwargs: dict, peft_path: Optional[str] = None, peft_kwargs: dict = dict()):
+    def _load_model(self,
+                    path: str,
+                    kwargs: dict,
+                    peft_path: Optional[str] = None,
+                    peft_kwargs: dict = dict(),
+                    local_modeling_module: Optional[str] = None,
+                    local_modeling_class: Optional[str] = None):
         from transformers import AutoModel, AutoModelForCausalLM
 
         DEFAULT_MODEL_KWARGS = dict(device_map='cuda', trust_remote_code=True)
-        model_kwargs = DEFAULT_MODEL_KWARGS
+        model_kwargs = DEFAULT_MODEL_KWARGS.copy()
         model_kwargs.update(kwargs)
         model_kwargs = _set_model_kwargs_torch_dtype(model_kwargs)
         self.logger.debug(f'using model_kwargs: {model_kwargs}')
         if is_npu_available():
             model_kwargs['device_map'] = 'npu'
 
-        try:
-            self.model = AutoModelForCausalLM.from_pretrained(path, **model_kwargs)
-            # self.model = self.model.to(torch.float16)
-        except ValueError:
-            self.model = AutoModel.from_pretrained(path, **model_kwargs)
+        if local_modeling_module:
+            local_model_class = _load_local_model_class(
+                path=path,
+                module_path=local_modeling_module,
+                class_name=local_modeling_class,
+            )
+            local_model_kwargs = model_kwargs.copy()
+            local_model_kwargs.pop('trust_remote_code', None)
+            self.logger.info(
+                f'loading model from local modeling module {local_modeling_module}.{local_model_class.__name__}'
+            )
+            self.model = local_model_class.from_pretrained(path, **local_model_kwargs)
+        else:
+            try:
+                self.model = AutoModelForCausalLM.from_pretrained(path, **model_kwargs)
+                # self.model = self.model.to(torch.float16)
+            except ValueError:
+                self.model = AutoModel.from_pretrained(path, **model_kwargs)
 
         if peft_path is not None:
             from peft import PeftModel

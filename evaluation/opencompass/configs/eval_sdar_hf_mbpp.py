@@ -87,6 +87,14 @@ datasets = [*sanitized_mbpp_datasets]
 for dataset in datasets:
     dataset['infer_cfg']['inferencer']['batch_size'] = 1 # only support batchsize=1 up to now
 
+# Switch this module path to choose which local modeling file controls SDAR decoding.
+# Example:
+#   configs.sdar_local_models.modeling_sdar_moe
+#   configs.sdar_local_models.modeling_sdar_moe_modified
+LOCAL_SDAR_MODELING_MODULE = (
+    'configs.sdar_local_models.modeling_sdar_moe'
+)
+
 # model
 model_configs = [
     # ("SDAR-1.7B-Chat-b4-thr0_95", "/xxx/Models/SDAR/SDAR-1.7B-Chat", 4, 0.95, 1),
@@ -107,6 +115,7 @@ for abbr, path, block_length, threshold, num_gpus in model_configs:
         type=BD3withChatTemplate,
         abbr=abbr,
         path=path,
+        local_modeling_module=LOCAL_SDAR_MODELING_MODULE,
         run_cfg=dict(num_gpus=num_gpus),
         generation_kwargs=dict(
             mask_id=151669,
