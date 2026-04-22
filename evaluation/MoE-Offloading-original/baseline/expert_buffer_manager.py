@@ -12,8 +12,9 @@ Unified Expert Buffer Manager - 统一的专家 Buffer 管理器 (Baseline 整�
 """
 
 import torch
-import torch.cuda.nvtx as nvtx
 from typing import Dict, Optional, List, Any, Tuple
+
+from .nvtx_utils import nvtx_range
 
 
 class ExpertWrapper:
@@ -461,54 +462,54 @@ class ExpertBufferManager:
 
         loaded_mapping = {}
 
-        # 处理 prefetch 状态迁移
-        if self.prefetch_in_progress or self.prefetch_mapping:
-            with nvtx.range("Prefetch_Validity_Check"):
+        with nvtx_range(f"Current_Layer_Availability_Check_Layer{layer_idx}"):
+            # 处理 prefetch 状态迁移
+            if self.prefetch_in_progress or self.prefetch_mapping:
                 for expert_id, buffer_idx in list(self.prefetch_in_progress.items()):
                     self.prefetch_mapping[expert_id] = buffer_idx
                 self.prefetch_in_progress.clear()
 
-        # 1. 优先检查 GPU Cache
-        experts_need_temp_load = []
-        for expert_id in expert_ids:
-            if self.gpu_cache_manager is not None:
-                cache_slot_idx = self.gpu_cache_manager.lookup(layer_idx, expert_id)
-                if cache_slot_idx is not None:
-                    # GPU Cache 命中
-                    virtual_idx = self._cache_slot_to_virtual_idx(cache_slot_idx)
-                    loaded_mapping[expert_id] = virtual_idx
-                    self.current_layer_mapping[expert_id] = virtual_idx
-                    self.gpu_cache_hits += 1
-                    continue
-            experts_need_temp_load.append(expert_id)
+            # 1. 优先检查 GPU Cache
+            experts_need_temp_load = []
+            for expert_id in expert_ids:
+                if self.gpu_cache_manager is not None:
+                    cache_slot_idx = self.gpu_cache_manager.lookup(layer_idx, expert_id)
+                    if cache_slot_idx is not None:
+                        # GPU Cache 命中
+                        virtual_idx = self._cache_slot_to_virtual_idx(cache_slot_idx)
+                        loaded_mapping[expert_id] = virtual_idx
+                        self.current_layer_mapping[expert_id] = virtual_idx
+                        self.gpu_cache_hits += 1
+                        continue
+                experts_need_temp_load.append(expert_id)
 
-        self.gpu_cache_misses += len(experts_need_temp_load)
+            self.gpu_cache_misses += len(experts_need_temp_load)
 
-        # 2. 检查 prefetch (仅对需要 temp load 的检查)
-        remaining_experts = []
-        prefetch_hits = 0
+            # 2. 检查 prefetch (仅对需要 temp load 的检查)
+            remaining_experts = []
+            prefetch_hits = 0
 
-        for expert_id in experts_need_temp_load:
-            if expert_id in self.prefetch_mapping:
-                buffer_idx = self.prefetch_mapping[expert_id]
-                self.current_layer_mapping[expert_id] = buffer_idx
-                loaded_mapping[expert_id] = buffer_idx
-                del self.prefetch_mapping[expert_id]
-                prefetch_hits += 1
-            else:
-                remaining_experts.append(expert_id)
+            for expert_id in experts_need_temp_load:
+                if expert_id in self.prefetch_mapping:
+                    buffer_idx = self.prefetch_mapping[expert_id]
+                    self.current_layer_mapping[expert_id] = buffer_idx
+                    loaded_mapping[expert_id] = buffer_idx
+                    del self.prefetch_mapping[expert_id]
+                    prefetch_hits += 1
+                else:
+                    remaining_experts.append(expert_id)
 
-        # 释放未命中的 prefetch
-        for expert_id in list(self.prefetch_mapping.keys()):
-            buffer_idx = self.prefetch_mapping.pop(expert_id)
-            if buffer_idx is not None:
-                self.buffer_status[buffer_idx] = False
+            # 释放未命中的 prefetch
+            for expert_id in list(self.prefetch_mapping.keys()):
+                buffer_idx = self.prefetch_mapping.pop(expert_id)
+                if buffer_idx is not None:
+                    self.buffer_status[buffer_idx] = False
 
-        self.prefetch_hits += prefetch_hits
+            self.prefetch_hits += prefetch_hits
 
         # 3. 加载剩余需要的专家到临时 buffer
         if remaining_experts:
-            with nvtx.range(f"Load_Additional_Experts_Layer_{layer_idx}_Count_{len(remaining_experts)}"):
+            with nvtx_range(f"Current_Layer_Miss_Load_Layer{layer_idx}"):
                 for expert_id in remaining_experts:
                     buffer_idx = self.find_free_buffer()
                     if buffer_idx is None:

@@ -8,13 +8,13 @@ from torch import nn
 from transformers import AutoConfig
 from transformers.models.qwen3_moe.modeling_qwen3_moe import Qwen3MoeForCausalLM, Qwen3MoeConfig, Qwen3MoeDecoderLayer, Qwen3MoeSparseMoeBlock, Qwen3MoeRMSNorm, Qwen3MoeAttention
 from safetensors.torch import load_file
+from baseline.nvtx_utils import nvtx_range
 
 # Monkey patch 0: 给Attention添加NVTX标记
 original_attention_forward = Qwen3MoeAttention.forward
 
 def patched_attention_forward(self, *args, **kwargs):
-    import torch.cuda.nvtx as nvtx
-    with nvtx.range(f"Attention_Layer{self.layer_idx}"):
+    with nvtx_range(f"Attention_Layer{self.layer_idx}"):
         return original_attention_forward(self, *args, **kwargs)
 
 Qwen3MoeAttention.forward = patched_attention_forward

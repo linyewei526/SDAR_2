@@ -28,13 +28,13 @@ from transformers.models.gpt_oss.modeling_gpt_oss import (
     GptOssAttention,
 )
 from transformers.models.gpt_oss.configuration_gpt_oss import GptOssConfig
+from baseline.nvtx_utils import nvtx_range
 
 # ===== Monkey Patch 0: 给Attention添加NVTX标记 =====
 original_attention_forward = GptOssAttention.forward
 
 def patched_attention_forward(self, *args, **kwargs):
-    import torch.cuda.nvtx as nvtx
-    with nvtx.range(f"Attention_Layer{self.layer_idx}"):
+    with nvtx_range(f"Attention_Layer{self.layer_idx}"):
         return original_attention_forward(self, *args, **kwargs)
 
 GptOssAttention.forward = patched_attention_forward
