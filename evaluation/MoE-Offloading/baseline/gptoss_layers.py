@@ -10,13 +10,13 @@ import time
 import torch
 from torch import nn
 from torch.nn import functional as F
-import torch.cuda.nvtx as nvtx
 
 from .debug_config import (
     PRINT_EXPERT_DETAILS,
     PRINT_PREFETCH_DEBUG,
     PREFETCH_ENABLED
 )
+from .nvtx_utils import nvtx_range
 
 # ===== Prefetch MACRO =====
 # Prefetch top-k experts based on predicted weights (0 = disable prefetch)
@@ -109,7 +109,7 @@ class GptOssSimpleMoE(nn.Module):
             router_input_flat = hidden_states_flat.clone().detach()
 
         # ===== Router计算 =====
-        with nvtx.range(f"MoE_Routing_Layer{self.layer_idx}"):
+        with nvtx_range(f"MoE_Routing_Layer{self.layer_idx}"):
             # 兼容官方GptOssTopKRouter（返回router_scores, router_indices）
             router_output = self.router(hidden_states_flat)
             
@@ -165,7 +165,7 @@ class GptOssSimpleMoE(nn.Module):
                 GptOssSimpleMoE.decode_token_counter += 1
 
         # ===== 找出unique expert IDs并加载experts =====
-        with nvtx.range("MoE_Expert_Load_Prep"):
+        with nvtx_range("MoE_Expert_Load_Prep"):
             flat_experts = selected_experts.reshape(-1)
             flat_experts_cpu = flat_experts.cpu()
             expert_counts = torch.bincount(flat_experts_cpu, minlength=self.num_experts)
@@ -195,11 +195,11 @@ class GptOssSimpleMoE(nn.Module):
 
             # 🚀 启动Prefetch（与compute并行）
             if PREFETCH_ENABLED and next_layer_selected_experts_cpu is not None and self.layer_idx < self.num_hidden_layers - 1:
-                with nvtx.range(f"Prefetch_Start_Layer{self.layer_idx}"):
+                with nvtx_range(f"Prefetch_Start_Layer{self.layer_idx}"):
                     self._parallel_prefetch(next_layer_selected_experts_cpu)
 
         # 🚀 GPU排序（延迟到prefetch之后，与prefetch HtoD overlap）
-        with nvtx.range("Global_Expert_Routing_Prep_GPU_Sort"):
+        with nvtx_range("Global_Expert_Routing_Prep_GPU_Sort"):
             num_tokens = selected_experts.shape[0]
 
             token_indices = torch.arange(num_tokens, device=selected_experts.device).repeat_interleave(self.top_k)
@@ -212,7 +212,7 @@ class GptOssSimpleMoE(nn.Module):
         # ===== 批量专家计算 =====
 
         # NVTX: Gather输入和准备阶段（不包括Batched_Expert_Compute）
-        with nvtx.range("Expert_Input_Gather_Prep"):
+        with nvtx_range("Expert_Input_Gather_Prep"):
             # Gather输入
             all_input_states = hidden_states_flat[sorted_tokens]
             # GPT-OSS使用router_scores而不是routing_weights
@@ -275,7 +275,7 @@ class GptOssSimpleMoE(nn.Module):
                         down_bias_views.append(None)
 
         # 批量计算
-        with nvtx.range("Batched_Expert_Compute"):
+        with nvtx_range("Batched_Expert_Compute"):
                 gate_up_w = torch.stack(gate_up_views, dim=0).contiguous()
                 down_w = torch.stack(down_views, dim=0).contiguous()
 
@@ -314,7 +314,7 @@ class GptOssSimpleMoE(nn.Module):
 
         # ===== 初始化并Scatter输出 =====
         next_states = torch.zeros_like(hidden_states_flat)
-        with nvtx.range("Batch_Result_Scatter"):
+        with nvtx_range("Batch_Result_Scatter"):
             next_states.scatter_add_(
                 0,
                 sorted_tokens.unsqueeze(1).expand(-1, hidden_dim),

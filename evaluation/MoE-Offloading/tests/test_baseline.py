@@ -9,7 +9,10 @@ import os
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root)
 
-from tests.baseline_utils import BaselineTestBase, QWEN3MOE_CONFIG, GPTOSS_CONFIG, add_baseline_common_args
+try:
+    from tests.baseline_utils import BaselineTestBase, QWEN3MOE_CONFIG, GPTOSS_CONFIG, add_baseline_common_args
+except ModuleNotFoundError:
+    from baseline_utils import BaselineTestBase, QWEN3MOE_CONFIG, GPTOSS_CONFIG, add_baseline_common_args
 
 
 def main():

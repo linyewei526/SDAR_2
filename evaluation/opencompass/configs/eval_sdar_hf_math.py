@@ -104,7 +104,7 @@ model_configs = [
     # ("SDAR-8B-Chat-b4-thr0_95", "/xxx/Models/SDAR/SDAR-8B-Chat", 4, 0.95, 1),
     # ("SDAR-8B-Chat-b4-thr1_00", "/xxx/Models/SDAR/SDAR-8B-Chat", 4, 1.0, 1),
     # ("SDAR-30B-A3B-Chat-b4-thr0_95", "/xxx/Models/SDAR/SDAR-30B-A3B-Chat", 4, 0.95, 1),
-    ("SDAR-30B-A3B-Chat-b32-thr0_95", "/data_3/wly/.cache/huggingface/hub/models--JetLM--SDAR-30B-A3B-Chat-b32/snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22", 32, 0.95, 1),
+    ("SDAR-30B-A3B-Chat-b32-thr0_95", "/data/home/wly/.cache/huggingface/hub/models--JetLM--SDAR-30B-A3B-Chat-b32/snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22", 32, 0.95, 1),
     # ("SDAR-30B-A3B-Chat-b4-thr1_00", "/xxx/Models/SDAR/SDAR-30B-A3B-Chat", 4, 1.0, 1)
 ]
 models = []

@@ -13,6 +13,7 @@ import torch
 from typing import Dict, Optional, List, Tuple, Any
 from collections import OrderedDict, defaultdict
 from baseline.debug_config import PRINT_BUFFER_INIT, PRINT_CACHE_UPDATE_DEBUG
+from baseline.nvtx_utils import nvtx_range
 
 
 class CachePolicy:
@@ -1001,50 +1002,51 @@ class GPUExpertCacheManager:
         if not hasattr(self.policy, 'update_cache'):
             return
 
-        # 按 logit score 排序（从大到小）
-        sorted_experts = sorted(swap_buffer_infos, key=lambda x: x[2], reverse=True)
+        with nvtx_range(f"Cache_Promotion_Layer{layer_idx}"):
+            # 按 logit score 排序（从大到小）
+            sorted_experts = sorted(swap_buffer_infos, key=lambda x: x[2], reverse=True)
 
-        # 需要 (expert_id, max_logit)
-        experts_to_update = [(eid, score) for eid, _, score in sorted_experts]
+            # 需要 (expert_id, max_logit)
+            experts_to_update = [(eid, score) for eid, _, score in sorted_experts]
 
-        # 让 policy 计算需要更新的 slots
-        updates = self.policy.update_cache(layer_idx, experts_to_update)
+            # 让 policy 计算需要更新的 slots
+            updates = self.policy.update_cache(layer_idx, experts_to_update)
 
-        # Debug: 打印 cache 更新统计
-        if PRINT_CACHE_UPDATE_DEBUG and updates:
-            new_experts = [u[0] for u in updates if u[2] == -1]  # slot 未满时添加
-            replaced_experts = [(u[0], u[2]) for u in updates if u[2] != -1]  # 替换
-            if new_experts or replaced_experts:
-                print(f"📦 Layer {layer_idx:2d} [{self.cache_policy_name}] cache update: "
-                      f"swap_in={len(swap_buffer_infos)}, "
-                      f"new={len(new_experts)}, "
-                      f"replaced={len(replaced_experts)}")
-                if replaced_experts:
-                    for new_eid, old_eid in replaced_experts[:5]:  # 只显示前5个
-                        new_logit = next((s for e, _, s in sorted_experts if e == new_eid), 0.0)
-                        print(f"   e{old_eid} -> e{new_eid} (logit={new_logit:.4f})")
+            # Debug: 打印 cache 更新统计
+            if PRINT_CACHE_UPDATE_DEBUG and updates:
+                new_experts = [u[0] for u in updates if u[2] == -1]  # slot 未满时添加
+                replaced_experts = [(u[0], u[2]) for u in updates if u[2] != -1]  # 替换
+                if new_experts or replaced_experts:
+                    print(f"📦 Layer {layer_idx:2d} [{self.cache_policy_name}] cache update: "
+                          f"swap_in={len(swap_buffer_infos)}, "
+                          f"new={len(new_experts)}, "
+                          f"replaced={len(replaced_experts)}")
+                    if replaced_experts:
+                        for new_eid, old_eid in replaced_experts[:5]:  # 只显示前5个
+                            new_logit = next((s for e, _, s in sorted_experts if e == new_eid), 0.0)
+                            print(f"   e{old_eid} -> e{new_eid} (logit={new_logit:.4f})")
 
-        # 执行 GPU-to-GPU memcpy
-        for expert_id, slot_offset, evicted_expert_id in updates:
-            # 找到这个 expert 在 swap_buffer_infos 中的 buffer_info
-            src_buffer_info = None
-            for eid, buf_info, _ in sorted_experts:
-                if eid == expert_id:
-                    src_buffer_info = buf_info
-                    break
+            # 执行 GPU-to-GPU memcpy
+            for expert_id, slot_offset, evicted_expert_id in updates:
+                # 找到这个 expert 在 swap_buffer_infos 中的 buffer_info
+                src_buffer_info = None
+                for eid, buf_info, _ in sorted_experts:
+                    if eid == expert_id:
+                        src_buffer_info = buf_info
+                        break
 
-            if src_buffer_info is None:
-                continue
+                if src_buffer_info is None:
+                    continue
 
-            # 计算 cache slot 的 global index
-            cache_slot_idx = layer_idx * self.slots_per_layer + slot_offset
-            dst_buffer_info = self.cache_buffer_infos[cache_slot_idx]
+                # 计算 cache slot 的 global index
+                cache_slot_idx = layer_idx * self.slots_per_layer + slot_offset
+                dst_buffer_info = self.cache_buffer_infos[cache_slot_idx]
 
-            # GPU-to-GPU copy
-            self._copy_buffer_to_cache_slot(
-                src_buffer_info, swap_memory_pool,
-                dst_buffer_info, self.gpu_memory_pool
-            )
+                # GPU-to-GPU copy
+                self._copy_buffer_to_cache_slot(
+                    src_buffer_info, swap_memory_pool,
+                    dst_buffer_info, self.gpu_memory_pool
+                )
 
         # 更新 cached_experts 映射（兼容旧代码）
         self.cached_experts = self.policy.cached_experts

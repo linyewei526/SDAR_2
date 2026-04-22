@@ -4,7 +4,6 @@ from torch import nn
 from torch.nn import functional as F
 from transformers.models.qwen3_moe.configuration_qwen3_moe import Qwen3MoeConfig
 from transformers.activations import ACT2FN
-import torch.cuda.nvtx as nvtx
 
 from .debug_config import (
     PRINT_EXPERT_DETAILS,
@@ -14,6 +13,7 @@ from .debug_config import (
     BMM_ENABLED,
     PRELAUNCH_ENABLED
 )
+from .nvtx_utils import nvtx_range
 
 # ===== Prefetch MACRO =====
 # Prefetch top-k experts based on predicted weights (0 = disable prefetch)
@@ -127,7 +127,7 @@ class Qwen3SimpleMoE(nn.Module):
                 Qwen3SimpleMoE.decode_token_counter += 1
 
         # ===== Router Calculation =====
-        with nvtx.range(f"MoE_Routing_Layer{self.layer_idx}"):
+        with nvtx_range(f"Routing_Layer{self.layer_idx}"):
             # Current layer router calculation
             full_routing_weights = F.softmax(router_logits, dim=1, dtype=torch.float)
             routing_weights, selected_experts = torch.topk(full_routing_weights, self.top_k, dim=-1)
@@ -215,48 +215,47 @@ class Qwen3SimpleMoE(nn.Module):
 
         # 🚀 优化：先做CPU同步，获取active_expert_ids
         # 直接 DtoH 然后 CPU bincount，避免 GPU kernel overhead
-        with nvtx.range("MoE_Expert_Load_Prep"):
-            flat_experts = selected_experts.reshape(-1)  # [N*top_k]
-            # 直接传到 CPU，避免 GPU bincount 的 kernel launch overhead
-            flat_experts_cpu = flat_experts.cpu()
-            expert_counts = torch.bincount(flat_experts_cpu, minlength=self.num_experts)
-            expert_offsets_cpu = torch.cumsum(expert_counts, dim=0) - expert_counts
+        flat_experts = selected_experts.reshape(-1)  # [N*top_k]
+        # 直接传到 CPU，避免 GPU bincount 的 kernel launch overhead
+        flat_experts_cpu = flat_experts.cpu()
+        expert_counts = torch.bincount(flat_experts_cpu, minlength=self.num_experts)
+        expert_offsets_cpu = torch.cumsum(expert_counts, dim=0) - expert_counts
 
-            # 获取active_expert_ids用于加载experts
-            active_expert_ids = torch.where(expert_counts > 0)[0].tolist()
-            expert_counts_list = expert_counts.tolist()
-            expert_offsets_list = expert_offsets_cpu.tolist()
+        # 获取active_expert_ids用于加载experts
+        active_expert_ids = torch.where(expert_counts > 0)[0].tolist()
+        expert_counts_list = expert_counts.tolist()
+        expert_offsets_list = expert_offsets_cpu.tolist()
 
-            # 🚀 一次性加载所有experts并获取映射表
-            router_logits = None
-            if self.expert_cache.enable_gpu_cache and self.expert_cache.gpu_cache_manager is not None:
-                policy_name = self.expert_cache.gpu_cache_manager.cache_policy_name
-                if policy_name in ("lru", "lfu", "topk_lru", "tinylfu"):
-                    max_logits_per_expert, _ = full_routing_weights.max(dim=0)
-                    max_logits_cpu = max_logits_per_expert.cpu()
-                    router_logits = {eid: max_logits_cpu[eid].item() for eid in active_expert_ids}
+        # 🚀 一次性加载所有experts并获取映射表
+        router_logits = None
+        if self.expert_cache.enable_gpu_cache and self.expert_cache.gpu_cache_manager is not None:
+            policy_name = self.expert_cache.gpu_cache_manager.cache_policy_name
+            if policy_name in ("lru", "lfu", "topk_lru", "tinylfu"):
+                max_logits_per_expert, _ = full_routing_weights.max(dim=0)
+                max_logits_cpu = max_logits_per_expert.cpu()
+                router_logits = {eid: max_logits_cpu[eid].item() for eid in active_expert_ids}
 
-            expert_indices = [(eid, eid) for eid in active_expert_ids]
-            expert_to_buffer_mapping = self.expert_cache.batch_load_experts_continuous(
-                self.layer_idx, expert_indices, router_logits
-            )
+        expert_indices = [(eid, eid) for eid in active_expert_ids]
+        expert_to_buffer_mapping = self.expert_cache.batch_load_experts_continuous(
+            self.layer_idx, expert_indices, router_logits
+        )
 
-            # 🚀 PreLaunch Control: 如果不启用PreLaunch，则等待load完成
-            if not PRELAUNCH_ENABLED:
-                torch.cuda.synchronize()
+        # 🚀 PreLaunch Control: 如果不启用PreLaunch，则等待load完成
+        if not PRELAUNCH_ENABLED:
+            torch.cuda.synchronize()
 
-            # 🚀 提前缓存shape信息和selected_experts，避免expert compute结束后的多次cuda同步
-            num_tokens_cached = selected_experts.shape[0]
-            expert_count_cached = len(active_expert_ids)
+        # 🚀 提前缓存shape信息和selected_experts，避免expert compute结束后的多次cuda同步
+        num_tokens_cached = selected_experts.shape[0]
+        expert_count_cached = len(active_expert_ids)
 
-            # 🚀 启动Prefetch（DtoH已在default stream上完成）
-            if PREFETCH_ENABLED and next_layer_selected_experts_cpu is not None and self.layer_idx < 47:
-                with nvtx.range(f"Prefetch_Start_Layer{self.layer_idx}"):
-                    self._parallel_prefetch(next_layer_selected_experts_cpu)
+        # 🚀 启动Prefetch（DtoH已在default stream上完成）
+        if PREFETCH_ENABLED and next_layer_selected_experts_cpu is not None and self.layer_idx < 47:
+            with nvtx_range(f"Next_Layer_Prefetch_Layer{self.layer_idx}"):
+                self._parallel_prefetch(next_layer_selected_experts_cpu)
 
         # 🚀 延迟GPU排序到prefetch之后，与prefetch HtoD overlap
         # 这样default stream在等待prefetch HtoD期间可以做GPU计算，避免bubble
-        with nvtx.range("Global_Expert_Routing_Prep_GPU_Sort"):
+        with nvtx_range(f"Reorder_Layer{self.layer_idx}"):
             num_tokens = selected_experts.shape[0]
 
             # 对应的token索引：[0,0, 1,1, 2,2,...]
@@ -271,28 +270,24 @@ class Qwen3SimpleMoE(nn.Module):
 
         # 阶段2: 统一批量专家计算 - Gather -> Compute -> Scatter
 
-        # NVTX: Gather输入和准备阶段（不包括Batched_Expert_Compute）
-        with nvtx.range("Expert_Input_Gather_Prep"):
+        with nvtx_range(f"Gather_Layer{self.layer_idx}"):
             # 优化1: 统一Gather输入（一次性索引操作）
             all_input_states = hidden_states_flat[sorted_tokens]  # [total_tokens, hidden_dim]
             all_routing_weights = routing_weights[sorted_tokens, sorted_ranks].unsqueeze(1)  # [total_tokens, 1]
-
-            # 优化2: Expert计算（支持BMM开关）
             expert_outputs = torch.empty_like(all_input_states)
-            pool = self.expert_cache.buffer_manager.gpu_memory_pool
 
             num_active = len(active_expert_ids)
+            batched_inputs = None
+            batched_rweights = None
+            gate_views, up_views, down_views = [], [], []
+            expert_offsets_local, expert_counts_local = [], []
+            per_expert_compute_args = []
+
             if num_active > 0:
                 if BMM_ENABLED:
-                    # ========== BMM优化模式 ==========
                     max_tok = max(expert_counts_list[eid] for eid in active_expert_ids)
-
-                    # 按专家分组构造批输入
                     batched_inputs = all_input_states.new_zeros(num_active, max_tok, hidden_dim)
                     batched_rweights = all_routing_weights.new_zeros(num_active, max_tok, 1)
-
-                    gate_views, up_views, down_views = [], [], []
-                    expert_offsets_local, expert_counts_local = [], []
 
                     for row_idx, expert_id in enumerate(active_expert_ids):
                         count = expert_counts_list[expert_id]
@@ -304,8 +299,9 @@ class Qwen3SimpleMoE(nn.Module):
                             batched_inputs[row_idx, :count] = all_input_states[offset : offset + count]
                             batched_rweights[row_idx, :count] = all_routing_weights[offset : offset + count]
 
-                        virtual_idx = expert_to_buffer_mapping[expert_id]
-                        gpu_buffer = self.expert_cache.buffer_manager.get_expert_view_for_computation(virtual_idx)
+                        gpu_buffer = self.expert_cache.buffer_manager.get_expert_view_for_computation(
+                            expert_to_buffer_mapping[expert_id]
+                        )
                         pool = gpu_buffer['memory_pool']
 
                         g_off = gpu_buffer['gate_proj']['offset']
@@ -319,66 +315,82 @@ class Qwen3SimpleMoE(nn.Module):
                         d_off = gpu_buffer['down_proj']['offset']
                         d_shape = gpu_buffer['down_proj']['shape']
                         down_views.append(pool[d_off : d_off + d_shape[0] * d_shape[1]].view(d_shape))
+                else:
+                    for expert_id in active_expert_ids:
+                        count = expert_counts_list[expert_id]
+                        offset = expert_offsets_list[expert_id]
 
-                    # 批量计算
-                    with nvtx.range("Batched_Expert_Compute"):
-                        gate_w = torch.stack(gate_views, dim=0).contiguous()
-                        up_w = torch.stack(up_views, dim=0).contiguous()
-                        down_w = torch.stack(down_views, dim=0).contiguous()
+                        if count == 0:
+                            continue
 
-                        gate_out = torch.nn.functional.silu(torch.bmm(batched_inputs, gate_w.transpose(1, 2)))
-                        up_out = torch.bmm(batched_inputs, up_w.transpose(1, 2))
-                        exp_out = torch.bmm(gate_out * up_out, down_w.transpose(1, 2))
-                        exp_out = exp_out * batched_rweights
+                        expert_input_states = all_input_states[offset : offset + count]
+                        expert_routing_weights = all_routing_weights[offset : offset + count]
 
-                        # 写回
-                        for row_idx, count in enumerate(expert_counts_local):
-                            if count == 0:
-                                continue
-                            offset = expert_offsets_local[row_idx]
-                            expert_outputs[offset : offset + count] = exp_out[row_idx, :count]
-            else:
-                # ========== Vanilla模式：逐expert计算（不用BMM） ==========
-                for expert_id in active_expert_ids:
-                    count = expert_counts_list[expert_id]
-                    offset = expert_offsets_list[expert_id]
+                        gpu_buffer = self.expert_cache.buffer_manager.get_expert_view_for_computation(
+                            expert_to_buffer_mapping[expert_id]
+                        )
+                        pool = gpu_buffer['memory_pool']
 
-                    if count == 0:
-                        continue
+                        g_off = gpu_buffer['gate_proj']['offset']
+                        g_shape = gpu_buffer['gate_proj']['shape']
+                        gate_w = pool[g_off : g_off + g_shape[0] * g_shape[1]].view(g_shape)
 
-                    # 获取当前expert的tokens
-                    expert_input_states = all_input_states[offset : offset + count]
-                    expert_routing_weights = all_routing_weights[offset : offset + count]
+                        u_off = gpu_buffer['up_proj']['offset']
+                        u_shape = gpu_buffer['up_proj']['shape']
+                        up_w = pool[u_off : u_off + u_shape[0] * u_shape[1]].view(u_shape)
 
-                    # 获取当前expert的权重
-                    virtual_idx = expert_to_buffer_mapping[expert_id]
-                    gpu_buffer = self.expert_cache.buffer_manager.get_expert_view_for_computation(virtual_idx)
-                    pool = gpu_buffer['memory_pool']
+                        d_off = gpu_buffer['down_proj']['offset']
+                        d_shape = gpu_buffer['down_proj']['shape']
+                        down_w = pool[d_off : d_off + d_shape[0] * d_shape[1]].view(d_shape)
 
-                    g_off = gpu_buffer['gate_proj']['offset']
-                    g_shape = gpu_buffer['gate_proj']['shape']
-                    gate_w = pool[g_off : g_off + g_shape[0] * g_shape[1]].view(g_shape)
+                        per_expert_compute_args.append(
+                            (
+                                offset,
+                                count,
+                                expert_input_states,
+                                expert_routing_weights,
+                                gate_w,
+                                up_w,
+                                down_w,
+                            )
+                        )
 
-                    u_off = gpu_buffer['up_proj']['offset']
-                    u_shape = gpu_buffer['up_proj']['shape']
-                    up_w = pool[u_off : u_off + u_shape[0] * u_shape[1]].view(u_shape)
+        with nvtx_range(f"Expert_Compute_Layer{self.layer_idx}"):
+            if num_active > 0:
+                if BMM_ENABLED:
+                    gate_w = torch.stack(gate_views, dim=0).contiguous()
+                    up_w = torch.stack(up_views, dim=0).contiguous()
+                    down_w = torch.stack(down_views, dim=0).contiguous()
 
-                    d_off = gpu_buffer['down_proj']['offset']
-                    d_shape = gpu_buffer['down_proj']['shape']
-                    down_w = pool[d_off : d_off + d_shape[0] * d_shape[1]].view(d_shape)
+                    gate_out = torch.nn.functional.silu(torch.bmm(batched_inputs, gate_w.transpose(1, 2)))
+                    up_out = torch.bmm(batched_inputs, up_w.transpose(1, 2))
+                    exp_out = torch.bmm(gate_out * up_out, down_w.transpose(1, 2))
+                    exp_out = exp_out * batched_rweights
 
-                    # Vanilla计算：逐个expert用F.linear（不用BMM）
-                    with nvtx.range("Per_Expert_Compute"):
-                        gate_out = torch.nn.functional.silu(F.linear(expert_input_states, gate_w))
-                        up_out = F.linear(expert_input_states, up_w)
-                        expert_output = F.linear(gate_out * up_out, down_w)
-                        expert_output = expert_output * expert_routing_weights
-
-                    # 写回
-                    expert_outputs[offset : offset + count] = expert_output
+                    for row_idx, count in enumerate(expert_counts_local):
+                        if count == 0:
+                            continue
+                        offset = expert_offsets_local[row_idx]
+                        expert_outputs[offset : offset + count] = exp_out[row_idx, :count]
+                else:
+                    for (
+                        offset,
+                        count,
+                        expert_input_states,
+                        expert_routing_weights,
+                        gate_w,
+                        up_w,
+                        down_w,
+                    ) in per_expert_compute_args:
+                        expert_output = F.linear(
+                            torch.nn.functional.silu(F.linear(expert_input_states, gate_w)) *
+                            F.linear(expert_input_states, up_w),
+                            down_w,
+                        )
+                        expert_outputs[offset : offset + count] = expert_output * expert_routing_weights
 
         # 优化3: 统一Scatter输出（一次性scatter_add）
-        with nvtx.range("Batch_Result_Scatter"):
+        with nvtx_range(f"Scatter_Layer{self.layer_idx}"):
             final_hidden_states.scatter_add_(
                 0,
                 sorted_tokens.unsqueeze(1).expand(-1, hidden_dim),

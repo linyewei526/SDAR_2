@@ -1,0 +1,90 @@
+(sdar) wly@a100:~/dLLM/SDAR_2/evaluation/MoE-Offloading$ nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none --capture-range=cudaProfilerApi --capture-range-end=stop --cuda-memory-usage=true --force-overwrite=true --output profiles/qwen3_sample1_only -e CUDA_VISIBLE_DEVICES=1 python -u tests/test_baseline.py --model qwen3moe --base-model-path /data/models/Qwen3-30B-A3B --benchmark gsm8k --start-idx 0 --num-samples 10 --max-new-tokens 128 --max-length 8192 --enable-gpu-cache --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --nsys-profile-single-sample 1 --nsys-use-cuda-profiler-api
+/data/home/wly/.conda/envs/sdar/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+🔧 Testing qwen3moe baseline
+🔧 Building qwen3moe model with offloading...
+🎯 Nsight capture markers enabled: sample 1 only, trigger = cudaProfilerStart/Stop
+Processed 4/16 files...
+Processed 8/16 files...
+Processed 12/16 files...
+Processed 16/16 files...
+📋 Loaded 10 prompts (num_samples=10, start_idx=0)
+
+============================================================
+🔄 Processing Sample 1/10
+============================================================
+Capture range started in the application.
+Capture range ended in the application.
+Generating '/tmp/nsys-report-4196.qdstrm'
+[1/1] [0%                          ] qwen3_sample1_only.nsys-repProcessing events...
+[1/1] [========================100%] qwen3_sample1_only.nsys-rep
+Generated:
+        /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/qwen3_sample1_only.nsys-rep
+✅ Sample 1 completed: 128 tokens, 8.50 tokens/s
+
+============================================================
+🔄 Processing Sample 2/10
+============================================================
+✅ Sample 2 completed: 128 tokens, 6.32 tokens/s
+
+============================================================
+🔄 Processing Sample 3/10
+============================================================
+✅ Sample 3 completed: 128 tokens, 9.44 tokens/s
+
+============================================================
+🔄 Processing Sample 4/10
+============================================================
+✅ Sample 4 completed: 128 tokens, 9.40 tokens/s
+
+============================================================
+🔄 Processing Sample 5/10
+============================================================
+✅ Sample 5 completed: 128 tokens, 6.59 tokens/s
+
+============================================================
+🔄 Processing Sample 6/10
+============================================================
+✅ Sample 6 completed: 128 tokens, 8.75 tokens/s
+
+============================================================
+🔄 Processing Sample 7/10
+============================================================
+✅ Sample 7 completed: 128 tokens, 8.67 tokens/s
+
+============================================================
+🔄 Processing Sample 8/10
+============================================================
+✅ Sample 8 completed: 128 tokens, 6.57 tokens/s
+
+============================================================
+🔄 Processing Sample 9/10
+============================================================
+✅ Sample 9 completed: 128 tokens, 8.77 tokens/s
+
+============================================================
+🔄 Processing Sample 10/10
+============================================================
+✅ Sample 10 completed: 128 tokens, 9.42 tokens/s
+
+============================================================
+📊 OVERALL STATISTICS (All Samples)
+============================================================
+Total samples: 10
+Total new tokens: 1280
+Total decode time: 158.94s
+⚡ Overall Decode TPS: 8.05 tokens/s
+============================================================
+
+
+📊 GPU Cache Statistics:
+   Policy: topk_lru
+   Slots: 768 (16 per layer)
+   Memory: 6.75 GB
+   Hits: 233092, Misses: 295842
+   Hit Rate: 44.07%
+   Alpha (Hit Rate / Cache Rate): 3.53
+   Cache Updates: 60498
+   Logit Threshold Percentile: 90.0%
+🧹 Cleaning up models...
+✅ Cleanup complete

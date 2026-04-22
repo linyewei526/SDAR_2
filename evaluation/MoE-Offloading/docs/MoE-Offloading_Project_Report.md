@@ -2,7 +2,7 @@
 
 本文基于以下代码目录整理：
 
-- 项目根目录：`/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading`
+- 项目根目录：`/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading`
 - 整理时间：`2026-04-18`
 
 目标是把这个项目当前的组织方式、MoE offloading 仿真逻辑、延迟/缓存开销评估方式、以及实际可执行的使用方法讲清楚，方便下一步把 SDAR 的块级解码接进来。
@@ -645,7 +645,7 @@ print(expert_cache.buffer_manager.get_stats())
 
 当前机器上已验证：
 
-- Conda 环境：`/data_3/wly/miniconda3/envs/sdar`
+- Conda 环境：`/data/home/wly/.conda/envs/sdar`
 - Python 包版本可用：
   - `torch 2.7.1+cu126`
   - `transformers 4.53.3`
@@ -657,14 +657,14 @@ print(expert_cache.buffer_manager.get_stats())
 推荐所有命令都显式用这个 Python：
 
 ```bash
-/data_3/wly/miniconda3/envs/sdar/bin/python ...
+/data/home/wly/.conda/envs/sdar/bin/python ...
 ```
 
 ### 7.2 先看帮助信息
 
 ```bash
-cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
-/data_3/wly/miniconda3/envs/sdar/bin/python tests/test_baseline.py --help
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading
+/data/home/wly/.conda/envs/sdar/bin/python tests/test_baseline.py --help
 ```
 
 当前可用参数为：
@@ -700,7 +700,7 @@ cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
 例如，本机已存在一个可用的 Qwen3-MoE 类模型缓存路径：
 
 ```text
-/data_3/wly/.cache/huggingface/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe
+/data/home/wly/.cache/huggingface/hub/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe
 ```
 
 #### 问题 2：当前 `baseline_utils.py` 的 benchmark 路径也写死成外部路径
@@ -713,9 +713,9 @@ cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
 
 但项目内本地 benchmark 文件是存在的：
 
-- `/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/benchmark/gsm8k/main/test-00000-of-00001.parquet`
-- `/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/benchmark/openai_humaneval/openai_humaneval/test-00000-of-00001.parquet`
-- `/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/benchmark/CNN-DM.parquet`
+- `/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/benchmark/gsm8k/main/test-00000-of-00001.parquet`
+- `/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/benchmark/openai_humaneval/openai_humaneval/test-00000-of-00001.parquet`
+- `/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/benchmark/CNN-DM.parquet`
 
 因此当前推荐做法是：
 
@@ -730,7 +730,7 @@ cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
 改成：
 
 ```python
-"/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/benchmark/gsm8k/main/test-00000-of-00001.parquet"
+"/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/benchmark/gsm8k/main/test-00000-of-00001.parquet"
 ```
 
 另外两个 benchmark 同理。
@@ -758,11 +758,11 @@ parser.add_argument("--enable-gpu-cache", action="store_true", default=True)
 如果你把 `tests/baseline_utils.py` 里的 benchmark 路径修成项目内路径，那么可以直接执行：
 
 ```bash
-cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading
 
-/data_3/wly/miniconda3/envs/sdar/bin/python tests/test_baseline.py \
+/data/home/wly/.conda/envs/sdar/bin/python tests/test_baseline.py \
   --model qwen3moe \
-  --base-model-path /data_3/wly/.cache/huggingface/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
+  --base-model-path /data/home/wly/.cache/huggingface/hub/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
   --benchmark gsm8k \
   --num-samples 1 \
   --start-idx 0 \
@@ -775,9 +775,9 @@ cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
 如果要跑静态缓存：
 
 ```bash
-/data_3/wly/miniconda3/envs/sdar/bin/python tests/test_baseline.py \
+/data/home/wly/.conda/envs/sdar/bin/python tests/test_baseline.py \
   --model qwen3moe \
-  --base-model-path /data_3/wly/.cache/huggingface/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
+  --base-model-path /data/home/wly/.cache/huggingface/hub/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
   --benchmark gsm8k \
   --num-samples 1 \
   --max-new-tokens 64 \
@@ -788,7 +788,7 @@ cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
 如果你有 GPT-OSS 权重目录，则命令形态是：
 
 ```bash
-/data_3/wly/miniconda3/envs/sdar/bin/python tests/test_baseline.py \
+/data/home/wly/.conda/envs/sdar/bin/python tests/test_baseline.py \
   --model gpt-oss \
   --base-model-path /your/path/to/gpt-oss-20b-BF16 \
   --benchmark humaneval \
@@ -821,11 +821,11 @@ cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
 更稳妥的做法是自己显式写：
 
 ```bash
-cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading
 
-/data_3/wly/miniconda3/envs/sdar/bin/python tests/test_baseline.py \
+/data/home/wly/.conda/envs/sdar/bin/python tests/test_baseline.py \
   --model qwen3moe \
-  --base-model-path /data_3/wly/.cache/huggingface/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
+  --base-model-path /data/home/wly/.cache/huggingface/hub/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
   --benchmark gsm8k \
   --num-samples 80 \
   --max-new-tokens 256 \
@@ -863,9 +863,9 @@ cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
 
 ```bash
 # static
-/data_3/wly/miniconda3/envs/sdar/bin/python tests/test_baseline.py \
+/data/home/wly/.conda/envs/sdar/bin/python tests/test_baseline.py \
   --model qwen3moe \
-  --base-model-path /data_3/wly/.cache/huggingface/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
+  --base-model-path /data/home/wly/.cache/huggingface/hub/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
   --benchmark gsm8k \
   --num-samples 20 \
   --max-new-tokens 128 \
@@ -873,9 +873,9 @@ cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
   --cache-slots-per-layer 16 | tee static.txt
 
 # lru
-/data_3/wly/miniconda3/envs/sdar/bin/python tests/test_baseline.py \
+/data/home/wly/.conda/envs/sdar/bin/python tests/test_baseline.py \
   --model qwen3moe \
-  --base-model-path /data_3/wly/.cache/huggingface/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
+  --base-model-path /data/home/wly/.cache/huggingface/hub/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
   --benchmark gsm8k \
   --num-samples 20 \
   --max-new-tokens 128 \
@@ -883,9 +883,9 @@ cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
   --cache-slots-per-layer 16 | tee lru.txt
 
 # topk_lru
-/data_3/wly/miniconda3/envs/sdar/bin/python tests/test_baseline.py \
+/data/home/wly/.conda/envs/sdar/bin/python tests/test_baseline.py \
   --model qwen3moe \
-  --base-model-path /data_3/wly/.cache/huggingface/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
+  --base-model-path /data/home/wly/.cache/huggingface/hub/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
   --benchmark gsm8k \
   --num-samples 20 \
   --max-new-tokens 128 \
@@ -906,16 +906,16 @@ cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
 因为代码里已经埋了 NVTX，推荐直接这样跑：
 
 ```bash
-cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading
 
 /usr/local/cuda-12.1/bin/nsys profile \
   --trace=cuda,nvtx,osrt \
   --sample=none \
   --force-overwrite=true \
   -o qwen3_gsm8k_topk_lru \
-  /data_3/wly/miniconda3/envs/sdar/bin/python tests/test_baseline.py \
+  /data/home/wly/.conda/envs/sdar/bin/python tests/test_baseline.py \
   --model qwen3moe \
-  --base-model-path /data_3/wly/.cache/huggingface/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
+  --base-model-path /data/home/wly/.cache/huggingface/hub/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe \
   --benchmark gsm8k \
   --num-samples 1 \
   --start-idx 0 \
@@ -1212,7 +1212,7 @@ SDAR 的特征是：
 - `sdar` 环境可用
 - `nsys` 可用
 - 本地有一个 Qwen3-MoE 类模型缓存：
-  - `/data_3/wly/.cache/huggingface/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe`
+  - `/data/home/wly/.cache/huggingface/hub/models--Qwen--Qwen3-30B-A3B-Instruct-2507/snapshots/0d7cf23991f47feeb3a57ecb4c9cee8ea4a17bfe`
 
 ### 12.2 当前机器上已确认不存在的默认资源
 
