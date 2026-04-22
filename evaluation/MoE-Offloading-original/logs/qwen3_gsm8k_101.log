@@ -1,0 +1,84 @@
+```bash
+CUDA_VISIBLE_DEVICES=1 python -u tests/test_baseline.py --model qwen3moe --base-model-path /data/models/Qwen3-30B-A3B --benchmark gsm8k --start-idx 0 --num-samples 10 --max-new-tokens 128 --max-length 8192 --enable-gpu-cache --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 | tee logs/qwen3_gsm8k_101.log
+```
+
+🔧 Testing qwen3moe baseline
+🔧 Building qwen3moe model with offloading...
+🏷️ NVTX ranges disabled for pure baseline run
+Processed 4/16 files...
+Processed 8/16 files...
+Processed 12/16 files...
+Processed 16/16 files...
+📋 Loaded 10 prompts (num_samples=10, start_idx=0)
+
+============================================================
+🔄 Processing Sample 1/10
+============================================================
+✅ Sample 1 completed: 128 tokens, 10.66 tokens/s
+
+============================================================
+🔄 Processing Sample 2/10
+============================================================
+✅ Sample 2 completed: 128 tokens, 10.69 tokens/s
+
+============================================================
+🔄 Processing Sample 3/10
+============================================================
+✅ Sample 3 completed: 128 tokens, 10.64 tokens/s
+
+============================================================
+🔄 Processing Sample 4/10
+============================================================
+✅ Sample 4 completed: 128 tokens, 10.60 tokens/s
+
+============================================================
+🔄 Processing Sample 5/10
+============================================================
+✅ Sample 5 completed: 128 tokens, 10.76 tokens/s
+
+============================================================
+🔄 Processing Sample 6/10
+============================================================
+✅ Sample 6 completed: 128 tokens, 8.68 tokens/s
+
+============================================================
+🔄 Processing Sample 7/10
+============================================================
+✅ Sample 7 completed: 128 tokens, 7.56 tokens/s
+
+============================================================
+🔄 Processing Sample 8/10
+============================================================
+✅ Sample 8 completed: 128 tokens, 9.45 tokens/s
+
+============================================================
+🔄 Processing Sample 9/10
+============================================================
+✅ Sample 9 completed: 128 tokens, 10.59 tokens/s
+
+============================================================
+🔄 Processing Sample 10/10
+============================================================
+✅ Sample 10 completed: 128 tokens, 10.77 tokens/s
+
+============================================================
+📊 OVERALL STATISTICS (All Samples)
+============================================================
+Total samples: 10
+Total new tokens: 1280
+Total decode time: 129.19s
+⚡ Overall Decode TPS: 9.91 tokens/s
+============================================================
+
+
+📊 GPU Cache Statistics:
+   Policy: topk_lru
+   Slots: 768 (16 per layer)
+   Memory: 6.75 GB
+   Hits: 234476, Misses: 294469
+   Hit Rate: 44.33%
+   Alpha (Hit Rate / Cache Rate): 3.55
+   Cache Updates: 60539
+   Logit Threshold Percentile: 90.0%
+🧹 Cleaning up models...
+✅ Cleanup complete
