@@ -1,0 +1,695 @@
+{
+  "metadata": {
+    "model_path": "/data/home/wly/.cache/huggingface/hub/models--JetLM--SDAR-30B-A3B-Chat-b32/snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22",
+    "dataset_module": "opencompass.configs.datasets.gsm8k.gsm8k_0shot_v2_gen_17d799",
+    "dataset_var_name": "gsm8k_datasets",
+    "dataset_index": 0,
+    "split": "test",
+    "record_mode": "both",
+    "record_scope": "all",
+    "record_first_k": 0,
+    "generation_kwargs": {
+      "mask_id": 151669,
+      "gen_length": 128,
+      "block_length": 32,
+      "denoising_steps": 32,
+      "temperature": 1.0,
+      "top_k": 1,
+      "top_p": 1.0,
+      "remasking": "low_confidence",
+      "threshold": 0.95
+    }
+  },
+  "recording": {
+    "record_experts": true,
+    "record_latency": true,
+    "recorded_sample_count": 5
+  },
+  "samples": [
+    {
+      "sample_idx": 0,
+      "expert_summary": {
+        "recorded_decode_layer_count": 2304,
+        "average_active_unique_experts_per_decode_layer": 54.042969,
+        "average_gpu_cache_hits_per_decode_layer": 13.469184,
+        "average_prefetch_hits_per_decode_layer": 25.5625,
+        "average_cpu_miss_loads_per_decode_layer": 15.011285,
+        "average_prefetch_available_experts_before_miss_load_per_decode_layer": 26.562934,
+        "average_gpu_cache_replacements_per_decode_layer": 1.960938,
+        "gpu_cache_hit_ratio": 0.249231,
+        "prefetch_hit_ratio": 0.473003,
+        "cpu_miss_load_ratio": 0.277766
+      },
+      "latency_summary": {
+        "recorded_denoise_layer_count": 2064,
+        "average_decode_layer_total_ms": 22.132566,
+        "operations": {
+          "attention": {
+            "occurrence_layer_count": 2064,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 0.0,
+            "average_end_ms": 0.299627,
+            "average_wall_span_ms": 0.299627,
+            "average_duration_ms": 0.299627,
+            "average_share_of_layer_percent": 1.462988
+          },
+          "routing": {
+            "occurrence_layer_count": 2064,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 0.657159,
+            "average_end_ms": 0.871801,
+            "average_wall_span_ms": 0.214641,
+            "average_duration_ms": 0.214642,
+            "average_share_of_layer_percent": 1.038133
+          },
+          "current_layer_availability_check": {
+            "occurrence_layer_count": 2064,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.184612,
+            "average_end_ms": 1.259705,
+            "average_wall_span_ms": 0.075093,
+            "average_duration_ms": 0.075094,
+            "average_share_of_layer_percent": 0.360148
+          },
+          "current_layer_miss_load": {
+            "occurrence_layer_count": 2063,
+            "occurrence_ratio": 0.999516,
+            "average_start_ms": 1.286544,
+            "average_end_ms": 12.669052,
+            "average_wall_span_ms": 11.382508,
+            "average_duration_ms": 11.382508,
+            "average_share_of_layer_percent": 51.35899
+          },
+          "next_layer_prefetch": {
+            "occurrence_layer_count": 2021,
+            "occurrence_ratio": 0.979167,
+            "average_start_ms": 7.860498,
+            "average_end_ms": 22.100576,
+            "average_wall_span_ms": 14.240078,
+            "average_duration_ms": 14.240078,
+            "average_share_of_layer_percent": 64.732293
+          },
+          "reorder": {
+            "occurrence_layer_count": 2064,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 12.754187,
+            "average_end_ms": 12.833898,
+            "average_wall_span_ms": 0.079711,
+            "average_duration_ms": 0.079711,
+            "average_share_of_layer_percent": 0.386945
+          },
+          "gather": {
+            "occurrence_layer_count": 2064,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 12.839231,
+            "average_end_ms": 13.298913,
+            "average_wall_span_ms": 0.459682,
+            "average_duration_ms": 0.459682,
+            "average_share_of_layer_percent": 1.638772
+          },
+          "expert_compute": {
+            "occurrence_layer_count": 2064,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 13.305467,
+            "average_end_ms": 14.74163,
+            "average_wall_span_ms": 1.436163,
+            "average_duration_ms": 1.436163,
+            "average_share_of_layer_percent": 6.619019
+          },
+          "scatter": {
+            "occurrence_layer_count": 2064,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 14.746534,
+            "average_end_ms": 14.807162,
+            "average_wall_span_ms": 0.060628,
+            "average_duration_ms": 0.060627,
+            "average_share_of_layer_percent": 0.292218
+          },
+          "cache_promotion": {
+            "occurrence_layer_count": 2063,
+            "occurrence_ratio": 0.999516,
+            "average_start_ms": 12.672171,
+            "average_end_ms": 12.721165,
+            "average_wall_span_ms": 0.048994,
+            "average_duration_ms": 0.048994,
+            "average_share_of_layer_percent": 0.227205
+          }
+        }
+      }
+    },
+    {
+      "sample_idx": 1,
+      "expert_summary": {
+        "recorded_decode_layer_count": 1728,
+        "average_active_unique_experts_per_decode_layer": 61.042824,
+        "average_gpu_cache_hits_per_decode_layer": 14.060764,
+        "average_prefetch_hits_per_decode_layer": 30.023148,
+        "average_cpu_miss_loads_per_decode_layer": 16.958912,
+        "average_prefetch_available_experts_before_miss_load_per_decode_layer": 31.215856,
+        "average_gpu_cache_replacements_per_decode_layer": 2.164352,
+        "gpu_cache_hit_ratio": 0.230343,
+        "prefetch_hit_ratio": 0.491837,
+        "cpu_miss_load_ratio": 0.27782
+      },
+      "latency_summary": {
+        "recorded_denoise_layer_count": 1584,
+        "average_decode_layer_total_ms": 25.87264,
+        "operations": {
+          "attention": {
+            "occurrence_layer_count": 1584,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 0.0,
+            "average_end_ms": 0.275196,
+            "average_wall_span_ms": 0.275196,
+            "average_duration_ms": 0.275197,
+            "average_share_of_layer_percent": 1.189612
+          },
+          "routing": {
+            "occurrence_layer_count": 1584,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 0.620555,
+            "average_end_ms": 0.827119,
+            "average_wall_span_ms": 0.206564,
+            "average_duration_ms": 0.206565,
+            "average_share_of_layer_percent": 0.859386
+          },
+          "current_layer_availability_check": {
+            "occurrence_layer_count": 1584,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.137184,
+            "average_end_ms": 1.213814,
+            "average_wall_span_ms": 0.07663,
+            "average_duration_ms": 0.07663,
+            "average_share_of_layer_percent": 0.314064
+          },
+          "current_layer_miss_load": {
+            "occurrence_layer_count": 1584,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.238951,
+            "average_end_ms": 14.845801,
+            "average_wall_span_ms": 13.606851,
+            "average_duration_ms": 13.606851,
+            "average_share_of_layer_percent": 52.513301
+          },
+          "next_layer_prefetch": {
+            "occurrence_layer_count": 1551,
+            "occurrence_ratio": 0.979167,
+            "average_start_ms": 9.370517,
+            "average_end_ms": 25.996502,
+            "average_wall_span_ms": 16.625985,
+            "average_duration_ms": 16.625985,
+            "average_share_of_layer_percent": 64.131837
+          },
+          "reorder": {
+            "occurrence_layer_count": 1584,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 14.940281,
+            "average_end_ms": 15.018228,
+            "average_wall_span_ms": 0.077947,
+            "average_duration_ms": 0.077948,
+            "average_share_of_layer_percent": 0.328268
+          },
+          "gather": {
+            "occurrence_layer_count": 1584,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 15.023373,
+            "average_end_ms": 15.399021,
+            "average_wall_span_ms": 0.375648,
+            "average_duration_ms": 0.375648,
+            "average_share_of_layer_percent": 1.517786
+          },
+          "expert_compute": {
+            "occurrence_layer_count": 1584,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 15.405392,
+            "average_end_ms": 17.021815,
+            "average_wall_span_ms": 1.616423,
+            "average_duration_ms": 1.616423,
+            "average_share_of_layer_percent": 6.342825
+          },
+          "scatter": {
+            "occurrence_layer_count": 1584,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 17.026689,
+            "average_end_ms": 17.086645,
+            "average_wall_span_ms": 0.059956,
+            "average_duration_ms": 0.059956,
+            "average_share_of_layer_percent": 0.248279
+          },
+          "cache_promotion": {
+            "occurrence_layer_count": 1584,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 14.848919,
+            "average_end_ms": 14.90232,
+            "average_wall_span_ms": 0.053401,
+            "average_duration_ms": 0.053402,
+            "average_share_of_layer_percent": 0.214464
+          }
+        }
+      }
+    },
+    {
+      "sample_idx": 2,
+      "expert_summary": {
+        "recorded_decode_layer_count": 2448,
+        "average_active_unique_experts_per_decode_layer": 59.673611,
+        "average_gpu_cache_hits_per_decode_layer": 14.302696,
+        "average_prefetch_hits_per_decode_layer": 27.684232,
+        "average_cpu_miss_loads_per_decode_layer": 17.686683,
+        "average_prefetch_available_experts_before_miss_load_per_decode_layer": 28.711193,
+        "average_gpu_cache_replacements_per_decode_layer": 2.214052,
+        "gpu_cache_hit_ratio": 0.239682,
+        "prefetch_hit_ratio": 0.463928,
+        "cpu_miss_load_ratio": 0.29639
+      },
+      "latency_summary": {
+        "recorded_denoise_layer_count": 2208,
+        "average_decode_layer_total_ms": 24.636508,
+        "operations": {
+          "attention": {
+            "occurrence_layer_count": 2208,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 0.0,
+            "average_end_ms": 0.270647,
+            "average_wall_span_ms": 0.270647,
+            "average_duration_ms": 0.270647,
+            "average_share_of_layer_percent": 1.216126
+          },
+          "routing": {
+            "occurrence_layer_count": 2208,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 0.609252,
+            "average_end_ms": 0.813781,
+            "average_wall_span_ms": 0.204529,
+            "average_duration_ms": 0.204529,
+            "average_share_of_layer_percent": 0.907173
+          },
+          "current_layer_availability_check": {
+            "occurrence_layer_count": 2208,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.120904,
+            "average_end_ms": 1.194919,
+            "average_wall_span_ms": 0.074014,
+            "average_duration_ms": 0.074014,
+            "average_share_of_layer_percent": 0.3233
+          },
+          "current_layer_miss_load": {
+            "occurrence_layer_count": 2208,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.219415,
+            "average_end_ms": 14.394838,
+            "average_wall_span_ms": 13.175423,
+            "average_duration_ms": 13.175424,
+            "average_share_of_layer_percent": 53.336573
+          },
+          "next_layer_prefetch": {
+            "occurrence_layer_count": 2162,
+            "occurrence_ratio": 0.979167,
+            "average_start_ms": 8.589708,
+            "average_end_ms": 24.691543,
+            "average_wall_span_ms": 16.101836,
+            "average_duration_ms": 16.101836,
+            "average_share_of_layer_percent": 65.630086
+          },
+          "reorder": {
+            "occurrence_layer_count": 2208,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 14.488375,
+            "average_end_ms": 14.566659,
+            "average_wall_span_ms": 0.078284,
+            "average_duration_ms": 0.078284,
+            "average_share_of_layer_percent": 0.346331
+          },
+          "gather": {
+            "occurrence_layer_count": 2208,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 14.571893,
+            "average_end_ms": 14.937971,
+            "average_wall_span_ms": 0.366078,
+            "average_duration_ms": 0.366078,
+            "average_share_of_layer_percent": 1.529078
+          },
+          "expert_compute": {
+            "occurrence_layer_count": 2208,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 14.943808,
+            "average_end_ms": 16.53312,
+            "average_wall_span_ms": 1.589312,
+            "average_duration_ms": 1.589312,
+            "average_share_of_layer_percent": 6.586336
+          },
+          "scatter": {
+            "occurrence_layer_count": 2208,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 16.537986,
+            "average_end_ms": 16.598898,
+            "average_wall_span_ms": 0.060912,
+            "average_duration_ms": 0.060912,
+            "average_share_of_layer_percent": 0.266889
+          },
+          "cache_promotion": {
+            "occurrence_layer_count": 2208,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 14.397961,
+            "average_end_ms": 14.453082,
+            "average_wall_span_ms": 0.055121,
+            "average_duration_ms": 0.055121,
+            "average_share_of_layer_percent": 0.233537
+          }
+        }
+      }
+    },
+    {
+      "sample_idx": 3,
+      "expert_summary": {
+        "recorded_decode_layer_count": 2016,
+        "average_active_unique_experts_per_decode_layer": 55.980655,
+        "average_gpu_cache_hits_per_decode_layer": 13.881448,
+        "average_prefetch_hits_per_decode_layer": 25.66121,
+        "average_cpu_miss_loads_per_decode_layer": 16.437996,
+        "average_prefetch_available_experts_before_miss_load_per_decode_layer": 26.84623,
+        "average_gpu_cache_replacements_per_decode_layer": 2.112103,
+        "gpu_cache_hit_ratio": 0.247969,
+        "prefetch_hit_ratio": 0.458394,
+        "cpu_miss_load_ratio": 0.293637
+      },
+      "latency_summary": {
+        "recorded_denoise_layer_count": 1824,
+        "average_decode_layer_total_ms": 22.594536,
+        "operations": {
+          "attention": {
+            "occurrence_layer_count": 1824,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 0.0,
+            "average_end_ms": 0.255063,
+            "average_wall_span_ms": 0.255063,
+            "average_duration_ms": 0.255062,
+            "average_share_of_layer_percent": 1.193298
+          },
+          "routing": {
+            "occurrence_layer_count": 1824,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 0.577608,
+            "average_end_ms": 0.773796,
+            "average_wall_span_ms": 0.196188,
+            "average_duration_ms": 0.196188,
+            "average_share_of_layer_percent": 0.912329
+          },
+          "current_layer_availability_check": {
+            "occurrence_layer_count": 1824,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.065205,
+            "average_end_ms": 1.134338,
+            "average_wall_span_ms": 0.069132,
+            "average_duration_ms": 0.069132,
+            "average_share_of_layer_percent": 0.314503
+          },
+          "current_layer_miss_load": {
+            "occurrence_layer_count": 1824,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.157984,
+            "average_end_ms": 13.201804,
+            "average_wall_span_ms": 12.04382,
+            "average_duration_ms": 12.043819,
+            "average_share_of_layer_percent": 53.21288
+          },
+          "next_layer_prefetch": {
+            "occurrence_layer_count": 1786,
+            "occurrence_ratio": 0.979167,
+            "average_start_ms": 7.805091,
+            "average_end_ms": 22.674918,
+            "average_wall_span_ms": 14.869827,
+            "average_duration_ms": 14.869828,
+            "average_share_of_layer_percent": 65.915386
+          },
+          "reorder": {
+            "occurrence_layer_count": 1824,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 13.283756,
+            "average_end_ms": 13.360824,
+            "average_wall_span_ms": 0.077069,
+            "average_duration_ms": 0.077068,
+            "average_share_of_layer_percent": 0.362893
+          },
+          "gather": {
+            "occurrence_layer_count": 1824,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 13.365778,
+            "average_end_ms": 13.695173,
+            "average_wall_span_ms": 0.329395,
+            "average_duration_ms": 0.329396,
+            "average_share_of_layer_percent": 1.472533
+          },
+          "expert_compute": {
+            "occurrence_layer_count": 1824,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 13.700761,
+            "average_end_ms": 15.175534,
+            "average_wall_span_ms": 1.474774,
+            "average_duration_ms": 1.474773,
+            "average_share_of_layer_percent": 6.630554
+          },
+          "scatter": {
+            "occurrence_layer_count": 1824,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 15.180454,
+            "average_end_ms": 15.24058,
+            "average_wall_span_ms": 0.060126,
+            "average_duration_ms": 0.060126,
+            "average_share_of_layer_percent": 0.282339
+          },
+          "cache_promotion": {
+            "occurrence_layer_count": 1824,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 13.204922,
+            "average_end_ms": 13.257485,
+            "average_wall_span_ms": 0.052563,
+            "average_duration_ms": 0.052563,
+            "average_share_of_layer_percent": 0.238679
+          }
+        }
+      }
+    },
+    {
+      "sample_idx": 4,
+      "expert_summary": {
+        "recorded_decode_layer_count": 4080,
+        "average_active_unique_experts_per_decode_layer": 58.521324,
+        "average_gpu_cache_hits_per_decode_layer": 14.4875,
+        "average_prefetch_hits_per_decode_layer": 28.104657,
+        "average_cpu_miss_loads_per_decode_layer": 15.929167,
+        "average_prefetch_available_experts_before_miss_load_per_decode_layer": 29.155392,
+        "average_gpu_cache_replacements_per_decode_layer": 2.067647,
+        "gpu_cache_hit_ratio": 0.247559,
+        "prefetch_hit_ratio": 0.480246,
+        "cpu_miss_load_ratio": 0.272194
+      },
+      "latency_summary": {
+        "recorded_denoise_layer_count": 3840,
+        "average_decode_layer_total_ms": 24.411098,
+        "operations": {
+          "attention": {
+            "occurrence_layer_count": 3840,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 0.0,
+            "average_end_ms": 0.278344,
+            "average_wall_span_ms": 0.278344,
+            "average_duration_ms": 0.278345,
+            "average_share_of_layer_percent": 1.207594
+          },
+          "routing": {
+            "occurrence_layer_count": 3840,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 0.621959,
+            "average_end_ms": 0.828427,
+            "average_wall_span_ms": 0.206468,
+            "average_duration_ms": 0.206468,
+            "average_share_of_layer_percent": 0.893491
+          },
+          "current_layer_availability_check": {
+            "occurrence_layer_count": 3840,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.140678,
+            "average_end_ms": 1.216554,
+            "average_wall_span_ms": 0.075876,
+            "average_duration_ms": 0.075876,
+            "average_share_of_layer_percent": 0.322396
+          },
+          "current_layer_miss_load": {
+            "occurrence_layer_count": 3840,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.241286,
+            "average_end_ms": 13.935329,
+            "average_wall_span_ms": 12.694043,
+            "average_duration_ms": 12.694042,
+            "average_share_of_layer_percent": 52.060347
+          },
+          "next_layer_prefetch": {
+            "occurrence_layer_count": 3760,
+            "occurrence_ratio": 0.979167,
+            "average_start_ms": 8.742523,
+            "average_end_ms": 24.431579,
+            "average_wall_span_ms": 15.689056,
+            "average_duration_ms": 15.689056,
+            "average_share_of_layer_percent": 64.594548
+          },
+          "reorder": {
+            "occurrence_layer_count": 3840,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 14.021211,
+            "average_end_ms": 14.099159,
+            "average_wall_span_ms": 0.077948,
+            "average_duration_ms": 0.077947,
+            "average_share_of_layer_percent": 0.340942
+          },
+          "gather": {
+            "occurrence_layer_count": 3840,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 14.104233,
+            "average_end_ms": 14.551133,
+            "average_wall_span_ms": 0.4469,
+            "average_duration_ms": 0.4469,
+            "average_share_of_layer_percent": 1.548618
+          },
+          "expert_compute": {
+            "occurrence_layer_count": 3840,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 14.557151,
+            "average_end_ms": 16.117479,
+            "average_wall_span_ms": 1.560328,
+            "average_duration_ms": 1.560328,
+            "average_share_of_layer_percent": 6.50532
+          },
+          "scatter": {
+            "occurrence_layer_count": 3840,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 16.122347,
+            "average_end_ms": 16.182462,
+            "average_wall_span_ms": 0.060114,
+            "average_duration_ms": 0.060115,
+            "average_share_of_layer_percent": 0.262332
+          },
+          "cache_promotion": {
+            "occurrence_layer_count": 3840,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 13.938446,
+            "average_end_ms": 13.990295,
+            "average_wall_span_ms": 0.051849,
+            "average_duration_ms": 0.051849,
+            "average_share_of_layer_percent": 0.218856
+          }
+        }
+      }
+    }
+  ],
+  "aggregate": {
+    "expert_summary": {
+      "recorded_decode_layer_count": 12576,
+      "average_active_unique_experts_per_decode_layer": 57.864345,
+      "average_gpu_cache_hits_per_decode_layer": 14.109176,
+      "average_prefetch_hits_per_decode_layer": 27.428992,
+      "average_cpu_miss_loads_per_decode_layer": 16.326177,
+      "average_prefetch_available_experts_before_miss_load_per_decode_layer": 28.506918,
+      "average_gpu_cache_replacements_per_decode_layer": 2.09701,
+      "gpu_cache_hit_ratio": 0.243832,
+      "prefetch_hit_ratio": 0.474022,
+      "cpu_miss_load_ratio": 0.282146
+    },
+    "latency_summary": {
+      "recorded_denoise_layer_count": 11520,
+      "average_decode_layer_total_ms": 23.959404,
+      "operations": {
+        "attention": {
+          "occurrence_layer_count": 11520,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": 0.0,
+          "average_end_ms": 0.276563,
+          "average_wall_span_ms": 0.276563,
+          "average_duration_ms": 0.276563,
+          "average_share_of_layer_percent": 1.250251
+        },
+        "routing": {
+          "occurrence_layer_count": 11520,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": 0.618615,
+          "average_end_ms": 0.824561,
+          "average_wall_span_ms": 0.205946,
+          "average_duration_ms": 0.205946,
+          "average_share_of_layer_percent": 0.920322
+        },
+        "current_layer_availability_check": {
+          "occurrence_layer_count": 11520,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": 1.132329,
+          "average_end_ms": 1.206744,
+          "average_wall_span_ms": 0.074415,
+          "average_duration_ms": 0.074415,
+          "average_share_of_layer_percent": 0.326938
+        },
+        "current_layer_miss_load": {
+          "occurrence_layer_count": 11519,
+          "occurrence_ratio": 0.999913,
+          "average_start_ms": 1.231687,
+          "average_end_ms": 13.805674,
+          "average_wall_span_ms": 12.573986,
+          "average_duration_ms": 12.573987,
+          "average_share_of_layer_percent": 52.424155
+        },
+        "next_layer_prefetch": {
+          "occurrence_layer_count": 11280,
+          "occurrence_ratio": 0.979167,
+          "average_start_ms": 8.493126,
+          "average_end_ms": 24.000807,
+          "average_wall_span_ms": 15.50768,
+          "average_duration_ms": 15.50768,
+          "average_share_of_layer_percent": 64.963215
+        },
+        "reorder": {
+          "occurrence_layer_count": 11520,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": 13.893351,
+          "average_end_ms": 13.97154,
+          "average_wall_span_ms": 0.078189,
+          "average_duration_ms": 0.078189,
+          "average_share_of_layer_percent": 0.35195
+        },
+        "gather": {
+          "occurrence_layer_count": 11520,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": 13.976681,
+          "average_end_ms": 14.381979,
+          "average_wall_span_ms": 0.405297,
+          "average_duration_ms": 0.405297,
+          "average_share_of_layer_percent": 1.544739
+        },
+        "expert_compute": {
+          "occurrence_layer_count": 11520,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": 14.388038,
+          "average_end_ms": 15.925842,
+          "average_wall_span_ms": 1.537804,
+          "average_duration_ms": 1.537804,
+          "average_share_of_layer_percent": 6.538705
+        },
+        "scatter": {
+          "occurrence_layer_count": 11520,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": 15.930725,
+          "average_end_ms": 15.991065,
+          "average_wall_span_ms": 0.060339,
+          "average_duration_ms": 0.060339,
+          "average_share_of_layer_percent": 0.269795
+        },
+        "cache_promotion": {
+          "occurrence_layer_count": 11519,
+          "occurrence_ratio": 0.999913,
+          "average_start_ms": 13.808793,
+          "average_end_ms": 13.861084,
+          "average_wall_span_ms": 0.052291,
+          "average_duration_ms": 0.052292,
+          "average_share_of_layer_percent": 0.2257
+        }
+      }
+    }
+  }
+}
