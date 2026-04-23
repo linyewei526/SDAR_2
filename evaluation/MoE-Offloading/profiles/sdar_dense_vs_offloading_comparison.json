@@ -1,0 +1,274 @@
+{
+  "methodology": {
+    "dataset_module": "opencompass.configs.datasets.gsm8k.gsm8k_0shot_v2_gen_17d799",
+    "start_idx": 0,
+    "num_samples": 5,
+    "generation_kwargs": {
+      "mask_id": 151669,
+      "gen_length": 128,
+      "block_length": 32,
+      "denoising_steps": 32,
+      "temperature": 1.0,
+      "top_k": 1,
+      "top_p": 1.0,
+      "remasking": "low_confidence",
+      "threshold": 0.95
+    },
+    "notes": [
+      "Pure SDAR TPS uses the original local modeling module without profiling enabled.",
+      "Pure SDAR per-layer breakdown uses the profiled local modeling module and should be interpreted qualitatively, because per-expert CUDA-event instrumentation adds overhead.",
+      "SDAR offloading TPS uses record-mode none / record-scope none.",
+      "SDAR offloading per-layer breakdown comes from the compact summary run and contains overlapped async prefetch durations, so operation shares are not exclusive wall-clock fractions."
+    ]
+  },
+  "artifacts": {
+    "dense_unprofiled_results": "/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_dense_original_all_results.json",
+    "dense_profile_results": "/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_dense_baseline_all_results.json",
+    "dense_profile_summary": "/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_dense_baseline_all.json",
+    "offloading_unprofiled_results": "/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_offloading_unprofiled_all_results.json",
+    "offloading_profile_results": "/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_results_all.json",
+    "offloading_profile_summary": "/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_all.json"
+  },
+  "throughput": {
+    "dense_unprofiled_tokens_per_second": 3.239192,
+    "offloading_unprofiled_tokens_per_second": 2.518023,
+    "dense_vs_offloading_speedup": 1.2864028644694667,
+    "dense_unprofiled_total_latency_s": 177.822143,
+    "offloading_unprofiled_total_latency_s": 228.353736
+  },
+  "derived_decode_layer_wall_time": {
+    "dense_unprofiled_average_decode_layer_wall_ms": 15.5005354776848,
+    "offloading_unprofiled_average_decode_layer_wall_ms": 19.822372916666666,
+    "dense_layer_wall_speedup_vs_offloading": 1.278818589538649
+  },
+  "dense_profile_latency_summary": {
+    "recorded_denoise_layer_count": 11472,
+    "average_decode_layer_total_ms": 23.866695,
+    "operations": {
+      "attention": {
+        "occurrence_layer_count": 11472,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": 0.01389,
+        "average_end_ms": 0.914254,
+        "average_wall_span_ms": 0.900363,
+        "average_duration_ms": 0.900363,
+        "average_share_of_layer_percent": 3.339475
+      },
+      "routing": {
+        "occurrence_layer_count": 11472,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": 1.162121,
+        "average_end_ms": 1.280877,
+        "average_wall_span_ms": 0.118756,
+        "average_duration_ms": 0.118756,
+        "average_share_of_layer_percent": 0.513936
+      },
+      "moe_dispatch": {
+        "occurrence_layer_count": 11472,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": 1.340245,
+        "average_end_ms": 23.741293,
+        "average_wall_span_ms": 22.401048,
+        "average_duration_ms": 7.630056,
+        "average_share_of_layer_percent": 33.072922
+      },
+      "moe_expert_compute_hbm_fetch": {
+        "occurrence_layer_count": 11472,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": 1.441852,
+        "average_end_ms": 23.812632,
+        "average_wall_span_ms": 22.37078,
+        "average_duration_ms": 8.38163,
+        "average_share_of_layer_percent": 33.573021
+      },
+      "moe_scatter": {
+        "occurrence_layer_count": 11472,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": 1.533433,
+        "average_end_ms": 23.840008,
+        "average_wall_span_ms": 22.306575,
+        "average_duration_ms": 2.105052,
+        "average_share_of_layer_percent": 9.102066
+      },
+      "other_layer_overhead": {
+        "occurrence_layer_count": 11472,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": null,
+        "average_end_ms": null,
+        "average_wall_span_ms": null,
+        "average_duration_ms": 4.730838,
+        "average_share_of_layer_percent": 20.398579
+      }
+    }
+  },
+  "offloading_profile_latency_summary": {
+    "recorded_denoise_layer_count": 11520,
+    "average_decode_layer_total_ms": 23.959404,
+    "operations": {
+      "attention": {
+        "occurrence_layer_count": 11520,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": 0.0,
+        "average_end_ms": 0.276563,
+        "average_wall_span_ms": 0.276563,
+        "average_duration_ms": 0.276563,
+        "average_share_of_layer_percent": 1.250251
+      },
+      "routing": {
+        "occurrence_layer_count": 11520,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": 0.618615,
+        "average_end_ms": 0.824561,
+        "average_wall_span_ms": 0.205946,
+        "average_duration_ms": 0.205946,
+        "average_share_of_layer_percent": 0.920322
+      },
+      "current_layer_availability_check": {
+        "occurrence_layer_count": 11520,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": 1.132329,
+        "average_end_ms": 1.206744,
+        "average_wall_span_ms": 0.074415,
+        "average_duration_ms": 0.074415,
+        "average_share_of_layer_percent": 0.326938
+      },
+      "current_layer_miss_load": {
+        "occurrence_layer_count": 11519,
+        "occurrence_ratio": 0.999913,
+        "average_start_ms": 1.231687,
+        "average_end_ms": 13.805674,
+        "average_wall_span_ms": 12.573986,
+        "average_duration_ms": 12.573987,
+        "average_share_of_layer_percent": 52.424155
+      },
+      "next_layer_prefetch": {
+        "occurrence_layer_count": 11280,
+        "occurrence_ratio": 0.979167,
+        "average_start_ms": 8.493126,
+        "average_end_ms": 24.000807,
+        "average_wall_span_ms": 15.50768,
+        "average_duration_ms": 15.50768,
+        "average_share_of_layer_percent": 64.963215
+      },
+      "reorder": {
+        "occurrence_layer_count": 11520,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": 13.893351,
+        "average_end_ms": 13.97154,
+        "average_wall_span_ms": 0.078189,
+        "average_duration_ms": 0.078189,
+        "average_share_of_layer_percent": 0.35195
+      },
+      "gather": {
+        "occurrence_layer_count": 11520,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": 13.976681,
+        "average_end_ms": 14.381979,
+        "average_wall_span_ms": 0.405297,
+        "average_duration_ms": 0.405297,
+        "average_share_of_layer_percent": 1.544739
+      },
+      "expert_compute": {
+        "occurrence_layer_count": 11520,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": 14.388038,
+        "average_end_ms": 15.925842,
+        "average_wall_span_ms": 1.537804,
+        "average_duration_ms": 1.537804,
+        "average_share_of_layer_percent": 6.538705
+      },
+      "scatter": {
+        "occurrence_layer_count": 11520,
+        "occurrence_ratio": 1.0,
+        "average_start_ms": 15.930725,
+        "average_end_ms": 15.991065,
+        "average_wall_span_ms": 0.060339,
+        "average_duration_ms": 0.060339,
+        "average_share_of_layer_percent": 0.269795
+      },
+      "cache_promotion": {
+        "occurrence_layer_count": 11519,
+        "occurrence_ratio": 0.999913,
+        "average_start_ms": 13.808793,
+        "average_end_ms": 13.861084,
+        "average_wall_span_ms": 0.052291,
+        "average_duration_ms": 0.052292,
+        "average_share_of_layer_percent": 0.2257
+      }
+    }
+  },
+  "offloading_profile_expert_summary": {
+    "recorded_decode_layer_count": 12576,
+    "average_active_unique_experts_per_decode_layer": 57.864345,
+    "average_gpu_cache_hits_per_decode_layer": 14.109176,
+    "average_prefetch_hits_per_decode_layer": 27.428992,
+    "average_cpu_miss_loads_per_decode_layer": 16.326177,
+    "average_prefetch_available_experts_before_miss_load_per_decode_layer": 28.506918,
+    "average_gpu_cache_replacements_per_decode_layer": 2.09701,
+    "gpu_cache_hit_ratio": 0.243832,
+    "prefetch_hit_ratio": 0.474022,
+    "cpu_miss_load_ratio": 0.282146
+  },
+  "evaluation": {
+    "dense_unprofiled": {
+      "accuracy": 60.0,
+      "details": [
+        {
+          "pred": "18",
+          "answer": "18",
+          "correct": true
+        },
+        {
+          "pred": "3",
+          "answer": "3",
+          "correct": true
+        },
+        {
+          "pred": "80,000+",
+          "answer": "70000",
+          "correct": false
+        },
+        {
+          "pred": "540",
+          "answer": "540",
+          "correct": true
+        },
+        {
+          "pred": "Wendifeedseachofherchickensthreecupsoffeedperday",
+          "answer": "20",
+          "correct": false
+        }
+      ]
+    },
+    "offloading_unprofiled": {
+      "accuracy": 60.0,
+      "details": [
+        {
+          "pred": "18",
+          "answer": "18",
+          "correct": true
+        },
+        {
+          "pred": "3",
+          "answer": "3",
+          "correct": true
+        },
+        {
+          "pred": "80,000+",
+          "answer": "70000",
+          "correct": false
+        },
+        {
+          "pred": "540",
+          "answer": "540",
+          "correct": true
+        },
+        {
+          "pred": "Wendifeedseachofherchickensthreecupsoffeedperday",
+          "answer": "20",
+          "correct": false
+        }
+      ]
+    }
+  }
+}

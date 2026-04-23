@@ -1,0 +1,60 @@
+{
+  "model_path": "/data/home/wly/.cache/huggingface/hub/models--JetLM--SDAR-30B-A3B-Chat-b32/snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22",
+  "local_modeling_module": "configs.sdar_local_models.modeling_sdar_moe_profiled",
+  "gpu": {
+    "index": 3,
+    "free_gib_at_start": 57.952,
+    "total_gib": 80.0,
+    "utilization_at_start": 0
+  },
+  "build_time_s": 22.08752,
+  "generation_kwargs": {
+    "mask_id": 151669,
+    "gen_length": 16,
+    "block_length": 32,
+    "denoising_steps": 32,
+    "temperature": 1.0,
+    "top_k": 1,
+    "top_p": 1.0,
+    "remasking": "low_confidence",
+    "threshold": 0.95
+  },
+  "dataset": {
+    "module": "opencompass.configs.datasets.gsm8k.gsm8k_0shot_v2_gen_17d799",
+    "var_name": "gsm8k_datasets",
+    "index": 0,
+    "split": "test",
+    "start_idx": 0,
+    "num_samples": 1
+  },
+  "aggregate": {
+    "sample_count": 1,
+    "total_generation_latency_s": 31.811548,
+    "total_generated_tokens": 39,
+    "average_latency_s": 31.811548,
+    "overall_tokens_per_second": 1.22597
+  },
+  "evaluation": {
+    "accuracy": 0.0,
+    "details": [
+      {
+        "pred": "Janet'sduckslay16eggsperday",
+        "answer": "18",
+        "correct": false
+      }
+    ]
+  },
+  "samples": [
+    {
+      "sample_idx": 0,
+      "question": "Janet’s ducks lay 16 eggs per day. She eats three for breakfast every morning and bakes muffins for her friends every day with four. She sells the remainder at the farmers' market daily for $2 per fresh duck egg. How much in dollars does she make every day at the farmers' market?",
+      "raw_prediction": " Janet's ducks lay 16 eggs per day.\nShe eats 3 eggs for breakfast and uses 4 eggs to bake muffins, so she uses a total of 3 + 4",
+      "processed_prediction": "Janet'sduckslay16eggsperday",
+      "reference": "18",
+      "latency_s": 31.811548,
+      "generated_token_count": 39,
+      "tokens_per_second": 1.22597
+    }
+  ],
+  "profile_output": "/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_dense_smoke_profile.json"
+}

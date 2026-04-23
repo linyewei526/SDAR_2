@@ -1,0 +1,151 @@
+{
+  "metadata": {
+    "model_path": "/data/home/wly/.cache/huggingface/hub/models--JetLM--SDAR-30B-A3B-Chat-b32/snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22",
+    "local_modeling_module": "configs.sdar_local_models.modeling_sdar_moe_profiled",
+    "dataset_module": "opencompass.configs.datasets.gsm8k.gsm8k_0shot_v2_gen_17d799",
+    "dataset_var_name": "gsm8k_datasets",
+    "dataset_index": 0,
+    "split": "test",
+    "generation_kwargs": {
+      "mask_id": 151669,
+      "gen_length": 16,
+      "block_length": 32,
+      "denoising_steps": 32,
+      "temperature": 1.0,
+      "top_k": 1,
+      "top_p": 1.0,
+      "remasking": "low_confidence",
+      "threshold": 0.95
+    }
+  },
+  "samples": [
+    {
+      "sample_idx": 0,
+      "metadata": {
+        "question": "Janet’s ducks lay 16 eggs per day. She eats three for breakfast every morning and bakes muffins for her friends every day with four. She sells the remainder at the farmers' market daily for $2 per fresh duck egg. How much in dollars does she make every day at the farmers' market?"
+      },
+      "latency_summary": {
+        "recorded_denoise_layer_count": 1008,
+        "average_decode_layer_total_ms": 26.293117,
+        "operations": {
+          "attention": {
+            "occurrence_layer_count": 1008,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 0.015674,
+            "average_end_ms": 0.929381,
+            "average_wall_span_ms": 0.913707,
+            "average_duration_ms": 0.913707,
+            "average_share_of_layer_percent": 3.624356
+          },
+          "routing": {
+            "occurrence_layer_count": 1008,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.216748,
+            "average_end_ms": 1.353585,
+            "average_wall_span_ms": 0.136837,
+            "average_duration_ms": 0.136837,
+            "average_share_of_layer_percent": 0.545303
+          },
+          "moe_dispatch": {
+            "occurrence_layer_count": 1008,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.42144,
+            "average_end_ms": 26.15239,
+            "average_wall_span_ms": 24.73095,
+            "average_duration_ms": 7.963962,
+            "average_share_of_layer_percent": 31.007623
+          },
+          "moe_expert_compute_hbm_fetch": {
+            "occurrence_layer_count": 1008,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.538582,
+            "average_end_ms": 26.231391,
+            "average_wall_span_ms": 24.692808,
+            "average_duration_ms": 9.6696,
+            "average_share_of_layer_percent": 34.643758
+          },
+          "moe_scatter": {
+            "occurrence_layer_count": 1008,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": 1.642251,
+            "average_end_ms": 26.260753,
+            "average_wall_span_ms": 24.618502,
+            "average_duration_ms": 2.141392,
+            "average_share_of_layer_percent": 8.531956
+          },
+          "other_layer_overhead": {
+            "occurrence_layer_count": 1008,
+            "occurrence_ratio": 1.0,
+            "average_start_ms": null,
+            "average_end_ms": null,
+            "average_wall_span_ms": null,
+            "average_duration_ms": 5.467619,
+            "average_share_of_layer_percent": 21.647004
+          }
+        }
+      }
+    }
+  ],
+  "aggregate": {
+    "latency_summary": {
+      "recorded_denoise_layer_count": 1008,
+      "average_decode_layer_total_ms": 26.293117,
+      "operations": {
+        "attention": {
+          "occurrence_layer_count": 1008,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": 0.015674,
+          "average_end_ms": 0.929381,
+          "average_wall_span_ms": 0.913707,
+          "average_duration_ms": 0.913707,
+          "average_share_of_layer_percent": 3.624356
+        },
+        "routing": {
+          "occurrence_layer_count": 1008,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": 1.216748,
+          "average_end_ms": 1.353585,
+          "average_wall_span_ms": 0.136837,
+          "average_duration_ms": 0.136837,
+          "average_share_of_layer_percent": 0.545303
+        },
+        "moe_dispatch": {
+          "occurrence_layer_count": 1008,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": 1.42144,
+          "average_end_ms": 26.15239,
+          "average_wall_span_ms": 24.73095,
+          "average_duration_ms": 7.963962,
+          "average_share_of_layer_percent": 31.007623
+        },
+        "moe_expert_compute_hbm_fetch": {
+          "occurrence_layer_count": 1008,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": 1.538582,
+          "average_end_ms": 26.231391,
+          "average_wall_span_ms": 24.692808,
+          "average_duration_ms": 9.6696,
+          "average_share_of_layer_percent": 34.643758
+        },
+        "moe_scatter": {
+          "occurrence_layer_count": 1008,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": 1.642251,
+          "average_end_ms": 26.260753,
+          "average_wall_span_ms": 24.618502,
+          "average_duration_ms": 2.141392,
+          "average_share_of_layer_percent": 8.531956
+        },
+        "other_layer_overhead": {
+          "occurrence_layer_count": 1008,
+          "occurrence_ratio": 1.0,
+          "average_start_ms": null,
+          "average_end_ms": null,
+          "average_wall_span_ms": null,
+          "average_duration_ms": 5.467619,
+          "average_share_of_layer_percent": 21.647004
+        }
+      }
+    }
+  }
+}
