@@ -5,14 +5,16 @@ from __future__ import annotations
 
 import csv
 import importlib
+import inspect
 import json
 import os
 import subprocess
 import sys
+import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
 import torch
 
@@ -27,6 +29,42 @@ for path in (PROJECT_ROOT, OPENCOMPASS_ROOT):
         sys.path.insert(0, str(path))
 
 
+BENCHMARK_PRESETS: Dict[str, Dict[str, Any]] = {
+    "gsm8k": {
+        "dataset_module": "opencompass.configs.datasets.gsm8k.gsm8k_0shot_v2_gen_17d799",
+        "dataset_var_name": "gsm8k_datasets",
+        "dataset_index": 0,
+        "default_split": "test",
+        "recommended_gen_length": 128,
+        "recommended_max_out_len": 128,
+    },
+    "math": {
+        "dataset_module": "opencompass.configs.datasets.math.math_prm800k_500_0shot_cot_gen_11c4b5",
+        "dataset_var_name": "math_datasets",
+        "dataset_index": 0,
+        "default_split": "test",
+        "recommended_gen_length": 128,
+        "recommended_max_out_len": 128,
+    },
+    "humaneval": {
+        "dataset_module": "opencompass.configs.datasets.humaneval.humaneval_gen",
+        "dataset_var_name": "humaneval_datasets",
+        "dataset_index": 0,
+        "default_split": "test",
+        "recommended_gen_length": 512,
+        "recommended_max_out_len": 512,
+    },
+    "sanitized_mbpp": {
+        "dataset_module": "opencompass.configs.datasets.mbpp.sanitized_mbpp_mdblock_0shot_nocot_gen_a2e416",
+        "dataset_var_name": "sanitized_mbpp_datasets",
+        "dataset_index": 0,
+        "default_split": "test",
+        "recommended_gen_length": 512,
+        "recommended_max_out_len": 512,
+    },
+}
+
+
 @dataclass
 class GPUStatus:
     index: int
@@ -37,6 +75,17 @@ class GPUStatus:
 
 def parse_candidate_gpus(gpus: str) -> List[int]:
     return [int(item.strip()) for item in gpus.split(",") if item.strip()]
+
+
+def resolve_benchmark_preset(benchmark: Optional[str]) -> Optional[Dict[str, Any]]:
+    if benchmark is None:
+        return None
+    try:
+        return dict(BENCHMARK_PRESETS[benchmark])
+    except KeyError as exc:
+        raise ValueError(
+            f"Unknown benchmark `{benchmark}`. Choices: {sorted(BENCHMARK_PRESETS)}"
+        ) from exc
 
 
 def query_gpu_statuses(candidate_gpus: Iterable[int]) -> List[GPUStatus]:
@@ -108,6 +157,71 @@ def wait_for_available_gpu(
         time.sleep(poll_interval_s)
 
 
+def reserve_cuda_memory(
+    target_free_gib: float,
+    *,
+    device: Optional[int] = None,
+    allocation_margin_gib: float = 0.5,
+    chunk_gib: float = 1.0,
+) -> Tuple[List[torch.Tensor], Dict[str, Any]]:
+    if not torch.cuda.is_available():
+        return [], {
+            "enabled": False,
+            "reason": "cuda_unavailable",
+        }
+    if target_free_gib <= 0:
+        raise ValueError("--reserve-free-memory-gib must be > 0")
+    if allocation_margin_gib < 0:
+        raise ValueError("allocation_margin_gib must be >= 0")
+    if chunk_gib <= 0:
+        raise ValueError("chunk_gib must be > 0")
+
+    cuda_device = (
+        torch.device(f"cuda:{device}") if device is not None else torch.device("cuda")
+    )
+    free_bytes, total_bytes = torch.cuda.mem_get_info(cuda_device)
+    target_free_bytes = int(target_free_gib * 1024 ** 3)
+    margin_bytes = int(allocation_margin_gib * 1024 ** 3)
+    bytes_to_reserve = max(0, free_bytes - target_free_bytes - margin_bytes)
+    chunk_bytes = int(chunk_gib * 1024 ** 3)
+
+    reservation_tensors = []
+    remaining_bytes = bytes_to_reserve
+    try:
+        while remaining_bytes > 0:
+            current_bytes = min(chunk_bytes, remaining_bytes)
+            reservation_tensors.append(
+                torch.empty(
+                    (current_bytes,),
+                    dtype=torch.uint8,
+                    device=cuda_device,
+                )
+            )
+            remaining_bytes -= current_bytes
+    except RuntimeError:
+        del reservation_tensors
+        torch.cuda.empty_cache()
+        raise
+
+    post_free_bytes, _ = torch.cuda.mem_get_info(cuda_device)
+    stats = {
+        "enabled": True,
+        "target_free_gib": target_free_gib,
+        "allocation_margin_gib": allocation_margin_gib,
+        "chunk_gib": chunk_gib,
+        "free_before_gib": round(free_bytes / (1024 ** 3), 6),
+        "total_gib": round(total_bytes / (1024 ** 3), 6),
+        "requested_reserve_gib": round(bytes_to_reserve / (1024 ** 3), 6),
+        "reserved_gib": round(
+            sum(tensor.numel() for tensor in reservation_tensors) / (1024 ** 3),
+            6,
+        ),
+        "free_after_gib": round(post_free_bytes / (1024 ** 3), 6),
+        "tensor_count": len(reservation_tensors),
+    }
+    return reservation_tensors, stats
+
+
 def instantiate_from_config(config: Dict[str, Any]):
     config = dict(config)
     obj_type = config.pop("type")
@@ -157,6 +271,101 @@ def load_dataset_bundle(dataset_module: str, dataset_var_name: str, dataset_inde
         "dataset_postprocessor": dataset_postprocessor,
         "evaluator": evaluator,
     }
+
+
+def score_predictions(
+    evaluator,
+    predictions,
+    references,
+    *,
+    test_set: Optional[List[Dict[str, Any]]] = None,
+    origin_prompt: Optional[List[str]] = None,
+):
+    if evaluator is None:
+        return {}
+
+    evaluator_name = evaluator.__class__.__name__
+    if evaluator_name == "HumanEvalEvaluator" and test_set is not None:
+        return _score_humaneval_subset(evaluator, predictions, references, test_set)
+
+    score_fn = evaluator.score
+    try:
+        signature = inspect.signature(score_fn)
+    except (TypeError, ValueError):
+        return score_fn(predictions, references)
+
+    kwargs = {}
+    parameters = signature.parameters
+    if "test_set" in parameters and test_set is not None:
+        kwargs["test_set"] = test_set
+    if "origin_prompt" in parameters and origin_prompt is not None:
+        kwargs["origin_prompt"] = origin_prompt
+    return score_fn(predictions, references, **kwargs)
+
+
+def _score_humaneval_subset(
+    evaluator,
+    predictions,
+    references,
+    test_set: List[Dict[str, Any]],
+):
+    if len(predictions) != len(references):
+        return {"error": "preds and refrs have different length"}
+
+    from human_eval.data import write_jsonl
+    from human_eval.evaluation import evaluate_functional_correctness
+
+    prompts = [item["prompt"] for item in test_set]
+    humaneval_preds = []
+    for preds, refer in zip(predictions, references):
+        if not isinstance(preds, list):
+            preds = [preds]
+        for pred in preds:
+            humaneval_preds.append({"task_id": refer, "completion": pred})
+
+    subset_problems = []
+    seen_task_ids = set()
+    for item in test_set:
+        task_id = item["task_id"]
+        if task_id in seen_task_ids:
+            continue
+        seen_task_ids.add(task_id)
+        subset_problems.append(
+            {
+                "task_id": task_id,
+                "prompt": item["prompt"],
+                "canonical_solution": item["canonical_solution"],
+                "test": item["test"],
+                "entry_point": item["entry_point"],
+            }
+        )
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        sample_file = os.path.join(tmp_dir, "human_eval_subset_samples.jsonl")
+        problem_file = os.path.join(tmp_dir, "human_eval_subset_problems.jsonl")
+        write_jsonl(sample_file, humaneval_preds)
+        write_jsonl(problem_file, subset_problems)
+        score = evaluate_functional_correctness(
+            sample_file,
+            evaluator.k,
+            n_workers=4,
+            timeout=3.0,
+            problem_file=problem_file,
+        )
+
+        detail_path = sample_file + "_results.jsonl"
+        details = {}
+        with open(detail_path, "r", encoding="utf-8") as handle:
+            for index, line in enumerate(handle):
+                line = json.loads(line)
+                line["is_correct"] = line["passed"]
+                if index < len(prompts):
+                    line["prompt"] = prompts[index]
+                details[str(index)] = line
+
+    results = {f"humaneval_{k}": score[k] * 100 for k in score}
+    results["details"] = details
+    return results
 
 
 def capture_cuda_memory_snapshot(

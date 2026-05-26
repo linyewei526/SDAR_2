@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "model_path": "/data/home/wly/.cache/huggingface/hub/models--JetLM--SDAR-30B-A3B-Chat-b32/snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22",
+    "model_path": "/data1/linyewei/models/models--JetLM--SDAR-30B-A3B-Chat-b32/snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22",
     "dataset_module": "opencompass.configs.datasets.gsm8k.gsm8k_0shot_v2_gen_17d799",
     "dataset_var_name": "gsm8k_datasets",
     "dataset_index": 0,

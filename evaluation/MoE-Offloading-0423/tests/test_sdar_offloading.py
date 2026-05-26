@@ -43,7 +43,7 @@ from opencompass.models.huggingface_bd3 import BD3withChatTemplate
 
 
 DEFAULT_MODEL_PATH = (
-    "/data/home/wly/.cache/huggingface/hub/models--JetLM--SDAR-30B-A3B-Chat-b32/"
+    "/data1/linyewei/models/models--JetLM--SDAR-30B-A3B-Chat-b32/"
     "snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22"
 )
 

@@ -213,3 +213,221 @@ python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-
 
 - 想同时保留两类摘要：
   - 用 `--record-mode both`
+
+## 七、遍历整个数据集时怎么写
+
+如果你要遍历“整个数据集 split”，当前脚本不能继续写成 `--num-samples 10 --start-idx 0`。原因很直接：
+
+- `--start-idx` 决定起始样本
+- `--num-samples` 决定本次真正要跑多少条
+- 脚本会检查 `start_idx + num_samples <= len(dataset[split])`
+
+所以“遍历整个 split”的写法是：
+
+- `--start-idx 0`
+- `--num-samples` 设为当前 split 的实际样本总数
+
+对当前默认数据集配置：
+
+- `--dataset-module opencompass.configs.datasets.gsm8k.gsm8k_0shot_v2_gen_17d799`
+- `--dataset-var-name gsm8k_datasets`
+- `--dataset-index 0`
+
+其样本数是：
+
+- `test` split: `1319`
+- `train` split: `7473`
+
+下面给出直接可用的单行命令。
+
+### 1. 遍历整个 GSM8K test split，不做记录
+
+```bash
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --split test --start-idx 0 --num-samples 1319 --gen-length 128 --max-out-len 128 --record-mode none --record-scope none --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_gsm8k_test_all_results.json
+```
+
+### 2. 遍历整个 GSM8K test split，记录全部 sample 的专家摘要和延迟摘要
+
+```bash
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --split test --start-idx 0 --num-samples 1319 --gen-length 128 --max-out-len 128 --record-mode both --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_gsm8k_test_all_summary.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_gsm8k_test_all_results.json
+```
+
+### 3. 遍历整个 GSM8K train split，不做记录
+
+```bash
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --split train --start-idx 0 --num-samples 7473 --gen-length 128 --max-out-len 128 --record-mode none --record-scope none --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_gsm8k_train_all_results.json
+```
+
+### 4. 遍历整个 GSM8K train split，记录全部 sample 的专家摘要和延迟摘要
+
+```bash
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --split train --start-idx 0 --num-samples 7473 --gen-length 128 --max-out-len 128 --record-mode both --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_gsm8k_train_all_summary.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_gsm8k_train_all_results.json
+```
+
+如果你后面换了别的数据集或别的 `split`，原则不变：
+
+- `--start-idx 0`
+- `--num-samples` 改成该 `split` 的真实长度
+
+## 八、`--gen-length` 和 `--max-out-len` 的区别
+
+这两个参数名字看起来相近，但在当前这条 SDAR 自定义生成链路里，职责并不完全一样。
+
+### 1. `--gen-length`
+
+`--gen-length` 会进入 `generation_kwargs['gen_length']`，最终直接传给：
+
+- `opencompass/opencompass/models/huggingface_bd3.py` 里的 `block_diffusion_generate(...)`
+
+它决定的是：
+
+- SDAR 解码阶段预留多少生成长度
+- `num_blocks = (prompt_len + gen_length + block_length - 1) // block_length`
+- 也就是 block diffusion 实际最多会往后生成多少 token 空间
+
+因此在当前实现里，**真正控制 SDAR 实际生成上限的核心参数是 `--gen-length`**。
+
+### 2. `--max-out-len`
+
+在 `tests/test_sdar_offloading.py` 里：
+
+- `max_out_len = args.max_out_len or args.gen_length`
+
+然后传给：
+
+- `model_wrapper.generate_from_template(..., max_out_len=max_out_len)`
+
+在 `huggingface_bd3.py` 里，`max_out_len` 主要用于：
+
+- 在 `mode == 'mid'` 时，为 prompt 截断预留空间
+- 写入 `generation_kwargs['max_new_tokens']`
+
+但当前这条本地 SDAR 路径最终调用的是自定义的 `block_diffusion_generate(...)`，它实际消费的是 `gen_length`，不是 `max_new_tokens`。
+
+所以对当前项目这条 SDAR 链路来说，可以把它理解成：
+
+- `--gen-length`: 真正的 SDAR 生成长度控制参数
+- `--max-out-len`: 外层接口参数，默认最好和 `--gen-length` 保持一致
+
+### 3. 实际建议
+
+为了避免歧义，当前项目里建议始终写成相同值，例如：
+
+- `--gen-length 128 --max-out-len 128`
+
+如果两者写成不同值，在当前本地 SDAR 实现里，应该优先按 `--gen-length` 理解实际生成上限。
+
+## 九、4 个 benchmark 的调用方式
+
+当前 `tests/test_sdar_offloading.py` 已经支持通过 `--benchmark` 快捷切换到 4 个常用 benchmark：
+
+- `gsm8k`
+- `math`
+- `humaneval`
+- `sanitized_mbpp`
+
+它的作用是自动填充对应的：
+
+- `--dataset-module`
+- `--dataset-var-name`
+- `--dataset-index`
+
+也就是说，你不再需要手动写一长串 OpenCompass 数据集模块路径。  
+但生成相关参数仍然由你自己控制，尤其是：
+
+- `--gen-length`
+- `--max-out-len`
+
+短 smoke run 可以按任务类型缩短生成长度：
+
+- 数学题类：`gsm8k`、`math` 使用 `128`
+- 代码生成类：`humaneval`、`sanitized_mbpp` 使用 `512`
+
+下面正式 benchmark 命令统一使用 `--gen-length 4096 --max-out-len 4096`，与 OpenCompass SDAR 配置保持一致。
+
+下面给出 4 个 benchmark 的 test split 全量单行命令示例。为了让结果结构统一，下面都用：
+
+- `--record-mode both --record-scope all`
+
+如果你只想测纯 baseline 延迟，把它们改成：
+
+- `--record-mode none --record-scope none`
+
+### 1. GSM8K
+
+```bash
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark gsm8k --split test --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --start-idx 0 --num-samples 1319 --gen-length 4096 --max-out-len 4096 --record-mode both --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_gsm8k_summary.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_gsm8k_results.json
+```
+
+### 2. MATH
+
+```bash
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark math --split test --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --start-idx 0 --num-samples 500 --gen-length 4096 --max-out-len 4096 --record-mode both --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_math_summary.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_math_results.json
+```
+
+### 3. HumanEval
+
+```bash
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark humaneval --split test --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --start-idx 0 --num-samples 164 --gen-length 4096 --max-out-len 4096 --record-mode both --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_humaneval_summary.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_humaneval_results.json
+```
+
+说明：
+
+- `humaneval` 的评估会复用 `evaluation/opencompass/human-eval` 这套执行评测后端
+- 当前脚本已经补上了 `test_set` 传递，所以可以直接走 OpenCompass 原生的 `HumanEvalEvaluator`
+
+### 4. Sanitized MBPP
+
+```bash
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark sanitized_mbpp --split test --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --start-idx 0 --num-samples 257 --gen-length 4096 --max-out-len 4096 --record-mode both --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_sanitized_mbpp_summary.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_sanitized_mbpp_results.json
+```
+
+说明：
+
+- `sanitized_mbpp` 当前走的是 OpenCompass 的 `MBPPEvaluator`
+- 如果本地数据缓存目录空间不足，首次构造数据集时可能会报磁盘空间不足，这不是 MoE-Offloading 代码路径的问题，而是本地缓存空间问题
+
+如果你不想用 `--benchmark` 快捷方式，仍然可以手动指定：
+
+- `--dataset-module`
+- `--dataset-var-name`
+- `--dataset-index`
+
+两种方式是等价的；`--benchmark` 只是把这 3 个数据集参数预先替你填好。
+
+## 十、带 GPU 显存占位的 4 个 benchmark 调用方式
+
+为了避免其他任务在评测过程中进入同一张 GPU 干扰效率测试，`tests/test_sdar_offloading.py` 现在支持显存占位参数：
+
+- `--reserve-gpu-memory`
+- `--reserve-gpu-memory-stage pre_build`
+- `--reserve-free-memory-gib 24`
+
+含义是：脚本选中 GPU 后、模型构建前，先占住大部分空闲显存，只留下约 `24GiB` 给当前 SDAR MoE-Offloading 测试使用。实现里还会额外保留约 `0.5GiB` allocator margin，避免占位本身卡在边界上 OOM。占位张量只持有 HBM，不参与计算；进程退出后自动释放。实际占用信息会写入结果 JSON 的 `gpu_memory_reservation` 字段。
+
+如果后续出现 OOM，可以把 `--reserve-free-memory-gib 24` 调大到 `28` 或 `32`。
+
+### 1. GSM8K，占位后测试
+
+```bash
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/
+python tests/test_sdar_offloading.py --benchmark gsm8k --split test --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-gpu-memory --reserve-gpu-memory-stage pre_build --reserve-free-memory-gib 24 --start-idx 0 --num-samples 1319 --gen-length 4096 --max-out-len 4096 --record-mode both --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_gsm8k_reserved_summary.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_gsm8k_reserved_results.json
+```
+
+### 2. MATH，占位后测试
+
+```bash
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark math --split test --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-gpu-memory --reserve-gpu-memory-stage pre_build --reserve-free-memory-gib 24 --start-idx 0 --num-samples 500 --gen-length 4096 --max-out-len 4096 --record-mode both --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_math_reserved_summary.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_math_reserved_results.json
+```
+
+### 3. HumanEval，占位后测试
+
+```bash
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark humaneval --split test --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-gpu-memory --reserve-gpu-memory-stage pre_build --reserve-free-memory-gib 24 --start-idx 0 --num-samples 164 --gen-length 4096 --max-out-len 4096 --record-mode both --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_humaneval_reserved_summary.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_humaneval_reserved_results.json
+```
+
+### 4. Sanitized MBPP，占位后测试
+
+```bash
+cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark sanitized_mbpp --split test --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-gpu-memory --reserve-gpu-memory-stage pre_build --reserve-free-memory-gib 24 --start-idx 0 --num-samples 257 --gen-length 4096 --max-out-len 4096 --record-mode both --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_sanitized_mbpp_reserved_summary.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_sanitized_mbpp_reserved_results.json
+```

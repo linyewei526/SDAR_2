@@ -643,7 +643,7 @@ def forward(self, input_ids, attention_mask, position_ids, past_key_values, use_
 | 默认本地模型实现 | `/data/home/wly/dLLM/SDAR_2/evaluation/opencompass/configs/sdar_local_models/modeling_sdar_moe.py` |
 | 本地模型变体 | `/data/home/wly/dLLM/SDAR_2/evaluation/opencompass/configs/sdar_local_models/modeling_sdar_moe_modified.py` |
 | 本地配置类 | `/data/home/wly/dLLM/SDAR_2/evaluation/opencompass/configs/sdar_local_models/configuration_sdar_moe.py` |
-| 权重目录 | `/data/home/wly/.cache/huggingface/hub/models--JetLM--SDAR-30B-A3B-Chat-b32/snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22/` |
+| 权重目录 | `/data1/linyewei/models/models--JetLM--SDAR-30B-A3B-Chat-b32/snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22/` |
 | 论文PDF | `/data/home/wly/dLLM/SDAR_2/evaluation/opencompass/configs/SDAR.pdf` |
 
 ## 附录B: SDAR vs AR 对比
