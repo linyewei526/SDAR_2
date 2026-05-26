@@ -72,7 +72,7 @@ math_summary.json
 如果你想指定实验目录，可以加：
 
 ```bash
---output-dir /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/my_run
+--output-dir /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/my_run
 ```
 
 如果只想给自动时间戳目录加后缀，可以加：
@@ -192,25 +192,25 @@ math_summary.json
 ### 1. 单 benchmark，只记录 TPS/accuracy
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark gsm8k --split test --start-idx 0 --num-samples 1319 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-gpu-memory --reserve-gpu-memory-stage pre_build --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode none --record-scope none --run-name gsm8k_speed
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark gsm8k --split test --start-idx 0 --num-samples 1319 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-gpu-memory --reserve-gpu-memory-stage pre_build --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode none --record-scope none --run-name gsm8k_speed
 ```
 
 ### 2. 单 benchmark，记录专家指标
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark gsm8k --split test --start-idx 0 --num-samples 1319 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-gpu-memory --reserve-gpu-memory-stage pre_build --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode experts --record-scope all --run-name gsm8k_experts
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark gsm8k --split test --start-idx 0 --num-samples 1319 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-gpu-memory --reserve-gpu-memory-stage pre_build --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode experts --record-scope all --run-name gsm8k_experts
 ```
 
 ### 3. 单 benchmark，记录时间指标
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark gsm8k --split test --start-idx 0 --num-samples 1319 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-gpu-memory --reserve-gpu-memory-stage pre_build --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode latency --record-scope all --run-name gsm8k_latency
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/python tests/test_sdar_offloading.py --benchmark gsm8k --split test --start-idx 0 --num-samples 1319 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-gpu-memory --reserve-gpu-memory-stage pre_build --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode latency --record-scope all --run-name gsm8k_latency
 ```
 
 ### 4. 单 benchmark，同时记录专家和时间指标
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/
 python tests/test_sdar_offloading.py --benchmark gsm8k --split test --start-idx 0 --num-samples 1319 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-gpu-memory --reserve-gpu-memory-stage pre_build --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode both --record-scope all --run-name gsm8k_both
 ```
 
@@ -233,7 +233,7 @@ humaneval -> sanitized_mbpp -> gsm8k -> math
 ### 1. 多 benchmark，只记录 TPS/accuracy
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/run_sdar_offloading_benchmarks.py --split test --num-samples 0 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode none --record-scope none --run-name suite_speed
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/python tests/run_sdar_offloading_benchmarks.py --split test --num-samples 0 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode none --record-scope none --run-name suite_speed
 ```
 
 说明：多 benchmark 入口默认启用显存占位，因此这里不需要写 `--reserve-gpu-memory`。
@@ -241,19 +241,19 @@ cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda
 ### 2. 多 benchmark，记录专家指标
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/run_sdar_offloading_benchmarks.py --split test --num-samples 0 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode experts --record-scope all --run-name suite_experts
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/python tests/run_sdar_offloading_benchmarks.py --split test --num-samples 0 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode experts --record-scope all --run-name suite_experts
 ```
 
 ### 3. 多 benchmark，记录时间指标
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/run_sdar_offloading_benchmarks.py --split test --num-samples 0 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode latency --record-scope all --run-name suite_latency
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/python tests/run_sdar_offloading_benchmarks.py --split test --num-samples 0 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode latency --record-scope all --run-name suite_latency
 ```
 
 ### 4. 多 benchmark，同时记录专家和时间指标
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/
 python tests/run_sdar_offloading_benchmarks.py --split test --num-samples 0 --gen-length 4096 --max-out-len 4096 --candidate-gpus 0,1,2,3 --min-free-memory-gib 60 --max-gpu-utilization 5 --reserve-free-memory-gib 24 --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --record-mode both --record-scope all --run-name suite_both
 ```
 
@@ -262,7 +262,7 @@ python tests/run_sdar_offloading_benchmarks.py --split test --num-samples 0 --ge
 运行结束后，终端会打印实验目录，例如：
 
 ```text
-Experiment directory: /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/20260428_010203_sdar_offloading_suite_suite_speed
+Experiment directory: /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/20260428_010203_sdar_offloading_suite_suite_speed
 ```
 
 你主要查看：

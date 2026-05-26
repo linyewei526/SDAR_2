@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
 import torch
+from tqdm import tqdm
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -47,7 +48,7 @@ from opencompass.models.huggingface_bd3 import BD3withChatTemplate
 
 
 DEFAULT_MODEL_PATH = (
-    "/data1/linyewei/models/models--JetLM--SDAR-30B-A3B-Chat-b32/"
+    "/data_3/wly/.cache/huggingface/hub/models--JetLM--SDAR-30B-A3B-Chat-b32/"
     "snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22"
 )
 
@@ -587,16 +588,22 @@ def run_sdar_offloading_benchmark_suite(args: argparse.Namespace) -> Dict[str, A
 
     benchmark_summaries = {}
     try:
-        for benchmark in benchmarks:
+        benchmark_iterator = tqdm(
+            benchmarks,
+            desc="Benchmark suite",
+            unit="benchmark",
+            dynamic_ncols=True,
+        )
+        for benchmark in benchmark_iterator:
             bench_args = copy.copy(args)
             bench_args.benchmark = benchmark
             bench_args.results_output = None
             bench_args.record_output = None
             bench_args.gpu_memory_output = None
             bench_args.output_dir = str(run_dir)
+            bench_args._suite_progress = True
             _resolve_dataset_args(bench_args)
 
-            print(f"Starting benchmark: {benchmark}")
             summary = run_sdar_offloading_evaluation(
                 bench_args,
                 run_dir=run_dir,
@@ -673,7 +680,15 @@ def _run_samples(
     sample_results = []
     tokenizer = model_wrapper.tokenizer
 
-    for local_idx in range(num_samples):
+    progress_desc = f"{_benchmark_label(args)} {args.split}"
+    sample_iterator = tqdm(
+        range(num_samples),
+        desc=progress_desc,
+        unit="sample",
+        dynamic_ncols=True,
+        position=1 if getattr(args, "_suite_progress", False) else 0,
+    )
+    for local_idx in sample_iterator:
         sample_idx = args.start_idx + local_idx
         entry = dataset[sample_idx]
         prompt = prompt_template.generate_item(entry)
@@ -755,13 +770,13 @@ def _run_samples(
         sample_results.append(sample_result)
 
         if args.verbose_samples:
-            print(
+            tqdm.write(
                 f"[sample {sample_idx}] latency={sample_latency_s:.3f}s "
                 f"tokens={generated_token_count} "
                 f"tps={sample_result['tokens_per_second']}"
             )
-            print(f"prediction: {processed_pred}")
-            print(f"reference : {processed_ref}")
+            tqdm.write(f"prediction: {processed_pred}")
+            tqdm.write(f"reference : {processed_ref}")
 
     eval_result = score_predictions(
         evaluator,

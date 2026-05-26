@@ -13,7 +13,7 @@
 
 本文基于当前项目状态和下面这次实际 profile 文件整理：
 
-- 项目目录：`/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading`
+- 项目目录：`/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading`
 - profile 文件：`profiles/qwen3_gsm8k_10.nsys-rep`
 - stats 文件：`profiles/qwen3_gsm8k_10.stats.txt`
 - 整理日期：`2026-04-21`
@@ -33,7 +33,7 @@ nsys profile \
   --output profiles/qwen3_gsm8k_10 \
   env CUDA_VISIBLE_DEVICES=0 python tests/test_baseline.py \
     --model qwen3moe \
-    --base-model-path /data/models/Qwen3-30B-A3B \
+    --base-model-path /data3/models/Qwen3-30B-A3B \
     --benchmark gsm8k \
     --start-idx 0 \
     --num-samples 10 \
@@ -606,7 +606,7 @@ nsys profile \
   --output profiles/qwen3_gsm8k_10_benchmark_only \
   env CUDA_VISIBLE_DEVICES=0 python tests/test_baseline.py \
     --model qwen3moe \
-    --base-model-path /data/models/Qwen3-30B-A3B \
+    --base-model-path /data3/models/Qwen3-30B-A3B \
     --benchmark gsm8k \
     --start-idx 0 \
     --num-samples 10 \
@@ -654,7 +654,7 @@ nsys profile \
   --output profiles/qwen3_gsm8k_10_latency_only \
   env CUDA_VISIBLE_DEVICES=0 python tests/test_baseline.py \
     --model qwen3moe \
-    --base-model-path /data/models/Qwen3-30B-A3B \
+    --base-model-path /data3/models/Qwen3-30B-A3B \
     --benchmark gsm8k \
     --start-idx 0 \
     --num-samples 10 \
@@ -689,7 +689,7 @@ nsys profile \
   --output profiles/qwen3_gsm8k_10_with_osrt \
   env CUDA_VISIBLE_DEVICES=0 python tests/test_baseline.py \
     --model qwen3moe \
-    --base-model-path /data/models/Qwen3-30B-A3B \
+    --base-model-path /data3/models/Qwen3-30B-A3B \
     --benchmark gsm8k \
     --start-idx 0 \
     --num-samples 10 \
@@ -761,7 +761,7 @@ nsys profile \
   --output profiles/qwen3_gsm8k_sparse \
   env CUDA_VISIBLE_DEVICES=0 python tests/test_baseline.py \
     --model qwen3moe \
-    --base-model-path /data/models/Qwen3-30B-A3B \
+    --base-model-path /data3/models/Qwen3-30B-A3B \
     --benchmark gsm8k \
     --start-idx 0 \
     --num-samples 10 \
@@ -1841,7 +1841,7 @@ nsys profile \
   -e CUDA_VISIBLE_DEVICES=0 \
   python tests/test_baseline.py \
     --model qwen3moe \
-    --base-model-path /data/models/Qwen3-30B-A3B \
+    --base-model-path /data3/models/Qwen3-30B-A3B \
     --benchmark gsm8k \
     --start-idx 0 \
     --num-samples 10 \
@@ -1886,13 +1886,13 @@ nsys profile \
 当前代码里，**不启用 `nsys` 且不手动传 `--enable-nvtx-ranges` 时，NVTX 默认关闭**，因此下面这条就是现在的纯净 baseline 单行命令：
 
 ```bash
-CUDA_VISIBLE_DEVICES=1 python -u tests/test_baseline.py --model qwen3moe --base-model-path /data/models/Qwen3-30B-A3B --benchmark gsm8k --start-idx 0 --num-samples 10 --max-new-tokens 128 --max-length 8192 --enable-gpu-cache --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 | tee logs/qwen3_gsm8k_10.log
+CUDA_VISIBLE_DEVICES=1 python -u tests/test_baseline.py --model qwen3moe --base-model-path /data3/models/Qwen3-30B-A3B --benchmark gsm8k --start-idx 0 --num-samples 10 --max-new-tokens 128 --max-length 8192 --enable-gpu-cache --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 | tee logs/qwen3_gsm8k_10.log
 ```
 
 如果你要跑 **带 `nsys`、只监测第一个 sample** 的单行命令，用下面这条：
 
 ```bash
-nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none --capture-range=cudaProfilerApi --capture-range-end=stop --cuda-memory-usage=true --force-overwrite=true --output profiles/qwen3_sample1_only -e CUDA_VISIBLE_DEVICES=1 python -u tests/test_baseline.py --model qwen3moe --base-model-path /data/models/Qwen3-30B-A3B --benchmark gsm8k --start-idx 0 --num-samples 10 --max-new-tokens 128 --max-length 8192 --enable-gpu-cache --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --nsys-profile-single-sample 1 --nsys-use-cuda-profiler-api
+nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none --capture-range=cudaProfilerApi --capture-range-end=stop --cuda-memory-usage=true --force-overwrite=true --output profiles/qwen3_sample1_only -e CUDA_VISIBLE_DEVICES=1 python -u tests/test_baseline.py --model qwen3moe --base-model-path /data3/models/Qwen3-30B-A3B --benchmark gsm8k --start-idx 0 --num-samples 10 --max-new-tokens 128 --max-length 8192 --enable-gpu-cache --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --nsys-profile-single-sample 1 --nsys-use-cuda-profiler-api
 ```
 
 如果你还想同时做外部全局显存快照记录，就在第二条命令末尾继续加上：

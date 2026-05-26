@@ -51,8 +51,8 @@ The integration keeps these SDAR-specific behaviors unchanged:
 ## Example
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading
-/data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py \
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
+/data_3/wly/miniconda3/envs/sdar/bin/python tests/test_sdar_offloading.py \
   --candidate-gpus 0,1,2,3 \
   --min-free-memory-gib 40 \
   --num-samples 2 \
@@ -84,7 +84,7 @@ The JSON includes:
 
 Validated with the SDAR environment:
 
-- Python: `/data/home/wly/.conda/envs/sdar/bin/python`
+- Python: `/data_3/wly/miniconda3/envs/sdar/bin/python`
 - Model: `SDAR-30B-A3B-Chat-b32`
 - Dataset: OpenCompass GSM8K config above
 
@@ -149,8 +149,8 @@ MoE-Offloading runtime，并评测推理延迟与显存占用。
 ### 示例
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading
-/data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py \
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
+/data_3/wly/miniconda3/envs/sdar/bin/python tests/test_sdar_offloading.py \
   --candidate-gpus 0,1,2,3 \
   --min-free-memory-gib 40 \
   --num-samples 2 \
@@ -182,7 +182,7 @@ JSON 里包括：
 
 验证环境如下：
 
-- Python: `/data/home/wly/.conda/envs/sdar/bin/python`
+- Python: `/data_3/wly/miniconda3/envs/sdar/bin/python`
 - 模型: `SDAR-30B-A3B-Chat-b32`
 - 数据集: 上述 OpenCompass GSM8K 配置
 

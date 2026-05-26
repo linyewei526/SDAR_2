@@ -145,42 +145,42 @@
 ### 1. 纯 baseline，不做任何记录
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 1 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode none --record-scope none --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_baseline_results.json
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 1 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode none --record-scope none --results-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_baseline_results.json
 ```
 
 ### 2. 记录全部 sample 的专家摘要
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 10 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode experts --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_expert_summary_all.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_expert_results_all.json
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 10 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode experts --record-scope all --record-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_expert_summary_all.json --results-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_expert_results_all.json
 ```
 
 ### 3. 只记录前 3 个 sample 的专家摘要
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 10 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode experts --record-scope first_k --record-first-k 3 --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_expert_summary_first3.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_expert_results_first3.json
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 10 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode experts --record-scope first_k --record-first-k 3 --record-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_expert_summary_first3.json --results-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_expert_results_first3.json
 ```
 
 ### 4. 记录全部 sample 的延迟摘要
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 10 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode latency --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_latency_summary_all.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_latency_results_all.json
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 10 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode latency --record-scope all --record-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_latency_summary_all.json --results-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_latency_results_all.json
 ```
 
 ### 5. 只记录前 2 个 sample 的专家摘要和延迟摘要
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 10 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode both --record-scope first_k --record-first-k 2 --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_first2.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_results_first2.json
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 10 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode both --record-scope first_k --record-first-k 2 --record-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_first2.json --results-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_results_first2.json
 ```
 
 ### 6. 记录当前评测范围内全部 sample 的专家摘要和延迟摘要
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading && /data/home/wly/.conda/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 10 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode both --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_all.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_results_all.json
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading && /data_3/wly/miniconda3/envs/sdar/bin/python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 10 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode both --record-scope all --record-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_all.json --results-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_results_all.json
 ```
 
 ```bash
 conda activate sdar
-python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 5 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode both --record-scope all --record-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_all.json --results-output /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_results_all.json
+python tests/test_sdar_offloading.py --candidate-gpus 0,1,2,3 --min-free-memory-gib 40 --max-gpu-utilization 20 --num-samples 5 --start-idx 0 --gen-length 128 --max-out-len 128 --record-mode both --record-scope all --record-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_all.json --results-output /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_results_all.json
 ```
 --min-free-memory-gib 和 --max-gpu-utilization 都是用来筛选“当前可用 GPU”的，作用发生在真正加载模型之前。
 --min-free-memory-gib 控制的是显存空闲下限。脚本会查询候选 GPU 当前还剩多少空闲显存，只有空闲显存不少于这个值的卡才会被认为可用。比如设成 40，就表示至少要有 40 GiB 空闲显存。

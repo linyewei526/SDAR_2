@@ -2,9 +2,9 @@
 
 本文基于以下项目状态整理：
 
-- 项目目录：`/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading`
+- 项目目录：`/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading`
 - 整理日期：`2026-04-21`
-- 目标模型路径：`/data/models/Qwen3-30B-A3B`
+- 目标模型路径：`/data3/models/Qwen3-30B-A3B`
 
 这份文档的目标很简单：
 
@@ -33,13 +33,13 @@
 
 本文里的命令已经直接使用你的真实模型目录：
 
-- `/data/models/Qwen3-30B-A3B`
+- `/data3/models/Qwen3-30B-A3B`
 
 ---
 
 ## 2. 你需要准备什么
 
-你的 Qwen3 模型目录 `/data/models/Qwen3-30B-A3B` 至少应该包含这些文件：
+你的 Qwen3 模型目录 `/data3/models/Qwen3-30B-A3B` 至少应该包含这些文件：
 
 - `config.json`
 - `model.safetensors.index.json`
@@ -76,7 +76,7 @@ conda activate sdar
 
 ## 2.1 我已经帮你检查过这个模型目录
 
-我已经实际检查了 `/data/models/Qwen3-30B-A3B`，结论如下：
+我已经实际检查了 `/data3/models/Qwen3-30B-A3B`，结论如下：
 
 - `config.json` 存在
 - `model.safetensors.index.json` 存在
@@ -416,7 +416,7 @@ Qwen3 有 `48` 层，所以总 slot 数是：
 ### 3.1 进入项目目录
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
 ```
 
 ### 3.2 激活 `sdar` 环境
@@ -431,8 +431,8 @@ conda activate sdar
 ### 3.3 定义几个变量，后面命令直接复用
 
 ```bash
-export PROJECT=/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading
-export MODEL=/data/models/Qwen3-30B-A3B
+export PROJECT=/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
+export MODEL=/data3/models/Qwen3-30B-A3B
 ```
 
 ### 3.4 检查模型目录是否完整
@@ -465,7 +465,7 @@ python -c "import torch, transformers, pyarrow, pandas; print('torch', torch.__v
 ```
 
 ```bash
-python -c "from transformers import AutoConfig, AutoTokenizer; m='/data/models/Qwen3-30B-A3B'; c=AutoConfig.from_pretrained(m); t=AutoTokenizer.from_pretrained(m); print(c.model_type, c.hidden_size, c.moe_intermediate_size, c.num_hidden_layers, c.num_experts, c.num_experts_per_tok); print(type(t).__name__, t.eos_token, bool(getattr(t, 'chat_template', None)))"
+python -c "from transformers import AutoConfig, AutoTokenizer; m='/data3/models/Qwen3-30B-A3B'; c=AutoConfig.from_pretrained(m); t=AutoTokenizer.from_pretrained(m); print(c.model_type, c.hidden_size, c.moe_intermediate_size, c.num_hidden_layers, c.num_experts, c.num_experts_per_tok); print(type(t).__name__, t.eos_token, bool(getattr(t, 'chat_template', None)))"
 ```
 
 ```bash
@@ -1174,7 +1174,7 @@ GUI 的价值就在于：
 1. 找到这个文件：
 
 ```text
-/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/qwen3_gsm8k_10.nsys-rep
+/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/qwen3_gsm8k_10.nsys-rep
 ```
 
 2. 在装有 Nsight Systems GUI 的机器上打开它。
@@ -1187,7 +1187,7 @@ GUI 的价值就在于：
 如果你的机器上有 `nsys-ui`，也可以尝试：
 
 ```bash
-nsys-ui /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/qwen3_gsm8k_10.nsys-rep
+nsys-ui /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/qwen3_gsm8k_10.nsys-rep
 ```
 
 ### 12.8 如果服务器没有 GUI，怎么处理
@@ -1204,7 +1204,7 @@ nsys-ui /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/qwen3_gsm8
 例如从别的机器执行：
 
 ```bash
-scp <server_user>@<server_host>:/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/qwen3_gsm8k_10.nsys-rep .
+scp <server_user>@<server_host>:/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/qwen3_gsm8k_10.nsys-rep .
 ```
 
 然后在本地 GUI 打开。
@@ -1353,7 +1353,7 @@ nsys stats --report cuda_gpu_mem_time_sum profiles/qwen3_gsm8k_10.nsys-rep | tee
 先确认你在项目目录下：
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
 ```
 
 再确认你已经激活了 `sdar` 环境：
@@ -1447,11 +1447,11 @@ Nsight Systems 命令行摘要：
 如果你已经理解上面内容，实际只要执行下面这些命令。
 
 ```bash
-cd /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading
-export PROJECT=/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading
+cd /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
+export PROJECT=/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading
 source /opt/anaconda3/etc/profile.d/conda.sh
 conda activate sdar
-export MODEL=/data/models/Qwen3-30B-A3B
+export MODEL=/data3/models/Qwen3-30B-A3B
 export CUDA_VISIBLE_DEVICES=0
 mkdir -p logs profiles
 ```

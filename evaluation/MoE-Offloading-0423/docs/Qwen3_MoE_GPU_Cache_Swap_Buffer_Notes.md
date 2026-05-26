@@ -9,11 +9,11 @@
 
 本文基于当前代码目录：
 
-- `/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading`
+- `/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading`
 
 以及当前 Qwen3 测试路径：
 
-- `/data/models/Qwen3-30B-A3B`
+- `/data3/models/Qwen3-30B-A3B`
 
 ---
 

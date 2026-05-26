@@ -5,10 +5,10 @@
 - 数据集: `opencompass.configs.datasets.gsm8k.gsm8k_0shot_v2_gen_17d799`
 - 样本范围: `start_idx=0`, `num_samples=5`
 - 生成参数: `gen_length=128`, `block_length=32`, `denoising_steps=32`, `threshold=0.95`
-- Pure SDAR TPS 文件: `/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_dense_original_all_results.json`
-- Pure SDAR profile 文件: `/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_dense_baseline_all.json`
-- Offloading TPS 文件: `/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_offloading_unprofiled_all_results.json`
-- Offloading summary 文件: `/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_all.json`
+- Pure SDAR TPS 文件: `/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_dense_original_all_results.json`
+- Pure SDAR profile 文件: `/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_dense_baseline_all.json`
+- Offloading TPS 文件: `/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_offloading_unprofiled_all_results.json`
+- Offloading summary 文件: `/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_all.json`
 
 ## 关键结论
 
@@ -92,5 +92,5 @@ Offloading 版本并不只是“把原始 SDAR 再加上 CPU->GPU copy”。它�
 1. Pure SDAR 的层级分解来自 `modeling_sdar_moe_profiled.py`，它在每个专家循环上都插了 CUDA event，因此 profile 版的绝对耗时会高于原始 pure SDAR 无埋点 TPS；这里适合看结构，不适合直接拿 profile 版 TPS 当真实吞吐。
 2. Offloading summary 的操作时长包含跨 stream 重叠，不能简单把各项时长相加解释为墙钟总时间。
 3. 真正用于吞吐对照的应当是：
-   - Pure SDAR 无埋点: `/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_dense_original_all_results.json`
-   - Offloading 无埋点: `/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_offloading_unprofiled_all_results.json`
+   - Pure SDAR 无埋点: `/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_dense_original_all_results.json`
+   - Offloading 无埋点: `/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_offloading_unprofiled_all_results.json`

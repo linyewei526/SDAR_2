@@ -1,5 +1,5 @@
-(sdar) wly@a100:~/dLLM/SDAR_2/evaluation/MoE-Offloading$ nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none --capture-range=cudaProfilerApi --capture-range-end=stop --cuda-memory-usage=true --force-overwrite=true --output profiles/qwen3_sample1_only -e CUDA_VISIBLE_DEVICES=1 python -u tests/test_baseline.py --model qwen3moe --base-model-path /data/models/Qwen3-30B-A3B --benchmark gsm8k --start-idx 0 --num-samples 10 --max-new-tokens 128 --max-length 8192 --enable-gpu-cache --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --nsys-profile-single-sample 1 --nsys-use-cuda-profiler-api
-/data/home/wly/.conda/envs/sdar/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+(sdar) wly@a100:~/dLLM/SDAR_2/evaluation/MoE-Offloading$ nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none --capture-range=cudaProfilerApi --capture-range-end=stop --cuda-memory-usage=true --force-overwrite=true --output profiles/qwen3_sample1_only -e CUDA_VISIBLE_DEVICES=1 python -u tests/test_baseline.py --model qwen3moe --base-model-path /data3/models/Qwen3-30B-A3B --benchmark gsm8k --start-idx 0 --num-samples 10 --max-new-tokens 128 --max-length 8192 --enable-gpu-cache --cache-policy topk_lru --cache-slots-per-layer 16 --topk-lru-logit-percentile 90.0 --nsys-profile-single-sample 1 --nsys-use-cuda-profiler-api
+/data_3/wly/miniconda3/envs/sdar/lib/python3.10/site-packages/torch/cuda/__init__.py:61: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
   import pynvml  # type: ignore[import]
 🔧 Testing qwen3moe baseline
 🔧 Building qwen3moe model with offloading...
@@ -19,7 +19,7 @@ Generating '/tmp/nsys-report-4196.qdstrm'
 [1/1] [0%                          ] qwen3_sample1_only.nsys-repProcessing events...
 [1/1] [========================100%] qwen3_sample1_only.nsys-rep
 Generated:
-        /data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/qwen3_sample1_only.nsys-rep
+        /data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/qwen3_sample1_only.nsys-rep
 ✅ Sample 1 completed: 128 tokens, 8.50 tokens/s
 
 ============================================================

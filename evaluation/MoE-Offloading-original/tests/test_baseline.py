@@ -30,7 +30,7 @@ def main():
         config = QWEN3MOE_CONFIG
         config.builder_func = qwen3_build_model
         defaults = {
-            "base_model_path": "/data/home/tianjianyang/models/moe/Qwen3-30B-A3B",
+            "base_model_path": "/data_3/tianjianyang/models/moe/Qwen3-30B-A3B",
             "temperature": 0.8,
             "enable_gpu_cache": True,
             "cache_policy": "topk_lru",
@@ -41,7 +41,7 @@ def main():
         config = GPTOSS_CONFIG
         config.builder_func = gptoss_build_model
         defaults = {
-            "base_model_path": "/data/home/tianjianyang/models/moe/gpt-oss-20b-BF16",
+            "base_model_path": "/data_3/tianjianyang/models/moe/gpt-oss-20b-BF16",
             "temperature": 0.7,
             "enable_gpu_cache": True,
             "cache_policy": "topk_lru",

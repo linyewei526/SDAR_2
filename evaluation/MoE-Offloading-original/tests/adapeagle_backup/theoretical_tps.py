@@ -91,8 +91,8 @@ def load_gptoss_config(config_path):
 
 def main():
     # 定义模型路径
-    QWEN3MOE_PATH = "/data/home/tianjianyang/models/moe/Qwen3-30B-A3B/config.json"
-    GPTOSS_PATH = "/data/home/tianjianyang/models/moe/gpt-oss-20b-BF16/config.json"
+    QWEN3MOE_PATH = "/data_3/tianjianyang/models/moe/Qwen3-30B-A3B/config.json"
+    GPTOSS_PATH = "/data_3/tianjianyang/models/moe/gpt-oss-20b-BF16/config.json"
 
     # Qwen3MoE配置
     print("📊 Qwen3MoE-30B")

@@ -1,5 +1,5 @@
 {
-  "model_path": "/data1/linyewei/models/models--JetLM--SDAR-30B-A3B-Chat-b32/snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22",
+  "model_path": "/data_3/wly/.cache/huggingface/hub/models--JetLM--SDAR-30B-A3B-Chat-b32/snapshots/c351bbc37d240aa6871f167e8f92d694281b0c22",
   "local_modeling_module": "configs.sdar_local_models.modeling_sdar_moe_offloading",
   "gpu": {
     "index": 0,
@@ -150,5 +150,5 @@
     "policy": "topk_lru",
     "logit_threshold_percentile": 90.0
   },
-  "record_summary_output": "/data/home/wly/dLLM/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_all.json"
+  "record_summary_output": "/data_3/wly/dLLM-MoE/SDAR_2/evaluation/MoE-Offloading/profiles/sdar_summary_all.json"
 }

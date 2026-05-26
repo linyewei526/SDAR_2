@@ -272,9 +272,9 @@ if __name__ == "__main__":
     parser.add_argument("--start_idx", type=int, default=0, help="Start index for testing")
     parser.add_argument("--num_samples", type=int, default=80, help="Number of samples to test")
     parser.add_argument("--base-model-path", type=str, 
-                        default="/data/home/tianjianyang/models/moe/Qwen3-30B-A3B", help="Path to base model (for qwen3moe)")
+                        default="/data_3/tianjianyang/models/moe/Qwen3-30B-A3B", help="Path to base model (for qwen3moe)")
     parser.add_argument("--gptoss-model-path", type=str, 
-                        default="/data/home/tianjianyang/models/moe/gpt-oss-20b-BF16", help="Path to GPT-OSS model (for gptoss)")
+                        default="/data_3/tianjianyang/models/moe/gpt-oss-20b-BF16", help="Path to GPT-OSS model (for gptoss)")
     parser.add_argument("--max-new-tokens", type=int, default=128, help="Max new tokens to generate per prompt")
     args = parser.parse_args()
 
